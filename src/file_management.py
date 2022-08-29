@@ -10,7 +10,7 @@ Manages the input and output of files
 '''
 
 
-# Loads specified file from examples folder. Makes testing easier, as full path not required.
+# Finds specified file in examples folder. Makes testing easier, as full path not required.
 # Arguments:
 # - filename (string) - full specified filename with extension
 # Returns:
@@ -19,5 +19,19 @@ def get_path(filename):
     currentDir = os.getcwd()
     parentDir = os.path.abspath(os.path.join(currentDir, os.pardir))
     filePath = parentDir + '\examples\\' + filename
-    print(filePath)
     return filePath
+
+# Loads specified file from examples folder and creates a string with its contents
+# Arguments:
+# - filename (string) - full specified filename with extension
+# Returns:
+# - fileContents (string) - contents of specified file
+def load_file(filename):
+    filePath = get_path(filename)
+    try:
+        file = open(filePath, "r")
+        fileContents = file.read()
+        file.close()
+    except:
+        return "Error: File not found"
+    return fileContents
