@@ -1,78 +1,42 @@
+import re
+
 '''
 lexer.py
 
 @Author - Ethan Brown - ewb0020@auburn.edu
 
-@Version - 29 AUG 22
+@Version - 30 AUG 22
 
 Reads file and outputs tokens as a list of dictionaries
 '''
+
+
+symbolPattern = re.compile(r'(?:[\\(){}[\]=&|^+<>/*%;.\'"?!~-])')
+idPattern = re.compile(r'(?:\w+|\d+)')
 
 # Scans through string of file contents to build a list of tokens.
 # Arguments:
 # - fileContents (string) - full contents of the source code file
 # Returns:
 # - tokens (list of dictionaries) - tokens from source code
-# Idea of calling separate functions from replit.com/talk/Make-a-Full-Lexer-in-Python/111397
 def lexer(fileContents):
-    operators = ['+', '-', '*', '=', '>', '>=']
+    matches = []
+    symbolMatches = symbolPattern.finditer(fileContents)
+    matches.append(symbolMatches)
+    textMatches = idPattern.finditer(fileContents)
+    matches.append(textMatches)
     tokens = []
-    i = 0
-    while (i < len(fileContents)):
-        lexeme = fileContents[i]
-        if lexeme.isalpha():
+    for matchList in matches:
+        for match in matchList:
+            span = match.span()
             token = {}
-            token['type'], token['content'], pos = id(fileContents[i:])
-            token['position'] = i
+            token['type'] = 'ID'
+            token['pos'] = span[0]
+            token['contents'] = match.group()
             tokens.append(token)
-            i += pos
-        elif lexeme.isdigit():
-            token = {}
-            token['type'], token['content'], pos = val(fileContents[i:])
-            token['position'] = i
-            tokens.append(token)
-            i += pos
-        elif lexeme in operators:
-            token = {}
-            token['type'], token['content'], pos = op(fileContents[i:], operators)
-            token['position'] = i
-            tokens.append(token)
-            i += pos
-        else:
-            i += 1
-    print(tokens)
-    return tokens
-
-def id(fileContents):
-    id = ''
-    idKeys = ['int', 'string', 'char']
-    for char in fileContents:
-        if not char.isalpha() and not char.isdigit() and char != "_":
-            break
-        id += char
-    if id in idKeys:
-        print("Keyword match!")
-        return 'keyword', id, len(id)
-    return 'id', id, len(id)
-
-def val(fileContents):
-    val = ''
-    for char in fileContents:
-        if not char.isdigit():
-            break
-        val += char
-        return 'val', val, len(val)
-
-def op(fileContents, operators):
-    op = ''
-    for char in fileContents:
-        if char not in operators:
-            break
-        if (op + char) not in operators:
-            break
-        op += char
-    return 'operator', op, len(op)
-
+    tokens = sorted(tokens, key=lambda d: d['pos'])
+    for token in tokens:
+        print(token)
 
 
 

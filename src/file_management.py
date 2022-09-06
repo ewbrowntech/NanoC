@@ -18,7 +18,8 @@ Manages the input and output of files
 def get_path(filename):
     currentDir = os.getcwd()
     parentDir = os.path.abspath(os.path.join(currentDir, os.pardir))
-    filePath = parentDir + '\examples\\' + filename
+    filePath = parentDir + '\\test\examples\\' + filename
+    print(filePath)
     return filePath
 
 # Loads specified file from examples folder and creates a string with its contents

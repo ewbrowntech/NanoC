@@ -1,4 +1,6 @@
 import sys
+from file_management import load_file
+from lexer import lexer
 '''
 main.py
 
@@ -9,8 +11,9 @@ main.py
 Runs compiler
 '''
 
-def main():
-    pass
+def main(args):
+    fileContents = load_file(args[1])
+    tokens = lexer(fileContents)
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)
