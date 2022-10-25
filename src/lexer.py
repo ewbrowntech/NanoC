@@ -1,13 +1,12 @@
 import re
-
 '''
 lexer.py
 
 @Author - Ethan Brown - ewb0020@auburn.edu
 
-@Version - 16 OCT 22
+@Version - 25 OCT 22
 
-Reads file and outputs tokens as a list of dictionaries
+Reads file and outputs tokens as a list of tokens
 '''
 
 testLine = "int i = 5 * (3 + 4);"
@@ -31,21 +30,22 @@ formats.append(lbraceFormat)
 formats.append(rbraceFormat)
 formats.append(symFormat)
 
-keywords = ['int', 'return']
+types = ['int']
+keywords = ['return']
 def lexer(source):
     tokens = []
     i = 0
     while (i < len(source)):
         tokensConsumed = False
-        print("i = " + str(i))
-        print("Char: " + source[i])
+        # print("i = " + str(i))
+        # print("Char: " + source[i])
         for format in formats:
             regex = format['pattern']
-            print(str(regex))
+            # print(str(regex))
             if (regex.match(source[i]) != None):
-                print(regex.match(source[i]))
+                # print(regex.match(source[i]))
                 for j in range(i + 1, len(source) + 1):
-                    print("j = " + str(j))
+                    # print("j = " + str(j))
                     matchBuffer = regex.match(source[i: j])
                     if (matchBuffer.group() != source[i: j] or j == len(source)):
                         match = regex.match(source[i: j])
@@ -55,27 +55,30 @@ def lexer(source):
                         break
                 break
         if not tokensConsumed:
-            print("No token generated")
+            # print("No token generated")
             i+=1
 
     for token in tokens:
         if token['type'] == 'ID' and token['contents'] in keywords:
             token['type'] = 'KEYWORD'
+        elif token['type'] == 'ID' and token['contents'] in types:
+            token['type'] = 'TYPE'
     return tokens
 
 
 def generate_token(match, type):
-    print("Generating token...")
+    # print("Generating token...")
     token = {}
     token['type'] = type
     token['span'] = match.span()
     token['contents'] = match.group()
-    print("Token: " + str(token))
+    # print("Token: " + str(token))
     return token
 
 def print_tokens(tokens):
-    print("Tokens:")
+    print("\nTokens:")
     for token in tokens:
         print('[' + str(tokens.index(token)) + '] ' + str(token))
+    print("\n")
 
-print_tokens(lexer(testLine))
+# print_tokens(lexer(testLine))

@@ -1,53 +1,91 @@
-# tokens = [{'type': 'keyword', 'contents': 'int'}, {'type': 'ID', 'contents': 'i'}, {'type': 'op', 'contents': '='},
-#          {'type': 'val', 'contents': '5'}, {'type': 'op', 'contents': '*'}, {'type': 'lparen', 'contents': '('},
-#          {'type': 'val', 'contents': '5'}, {'type': 'op', 'contents': '+'}, {'type': 'val', 'contents': '5'},
-#          {'type': 'rparen', 'contents': ')'}]
+'''
+parser.py
 
-# Decl: assgnDecl
-# assgnDecl: key id = expr | id = expr
-# expr = num | expr op expr | (expr)
+@Author - Ethan Brown - ewb0020@auburn.edu
 
+@Version - 25 OCT 22
 
+Parses tokens
+'''
 
-class parse_exception:
+class parse_exception(Exception):
     pass
 
-keywords = ["int"]
 localIndex = 0
+
 def parse(tokens):
-    parseTree = []
-    parseTree.append("Decl")
-    for token in tokens:
-        if token['type'] == 'keyword':
-            parseTree.append("assignDecl")
-            parseTree.append(parseAssgn(tokens, tokens.index(token)))
+    parseTree = parse_program(tokens)
     return parseTree
 
-def parse_program(tokens, index):
-    pass
+def parse_program(tokens):
+    program = {'type': 'program'}
+    program['declList'] = parse_DeclList(tokens)
+    return program
 
-def parse_DeclList():
-    pass
+def parse_DeclList(tokens):
+    declarationList = {'type': 'declarationList'}
+    declarationList['functionDefinition'] = parse_FuncDef(tokens)
+    return declarationList
 
-def parse_FuncDef():
-    pass
+def parse_FuncDef(tokens):
+    global localIndex
+    functionDefinition = {'type': 'functionDefinition'}
+    if tokens[localIndex]['type'] == 'TYPE':
+        functionDefinition['TYPE'] = tokens[localIndex]['contents']
+        localIndex += 1
+        functionDefinition['ID'] = parse_Identifier(tokens)
+    else:
+        print(tokens[localIndex])
+        raise parse_exception
 
-def parse_Identifier():
-    pass
+    if tokens[localIndex]['type'] == 'LPAR' and tokens[localIndex]['contents'] == '(':
+        localIndex +=1
+        functionDefinition['params'] = parse_ParamList(tokens)
+    else:
+        raise parse_exception
 
-def parse_ParamList():
-    pass
+    if tokens[localIndex]['type'] == 'RPAR' and tokens[localIndex]['contents'] == ')':
+        localIndex += 1
+    else:
+        raise parse_exception
 
-def parse_CompoundStatement():
-    pass
+    if tokens[localIndex]['type'] == 'LBRACE' and tokens[localIndex]['contents'] == '{':
+        localIndex += 1
+        functionDefinition['compoundStatement'] = parse_CompoundStatement(tokens)
+    else:
+        raise parse_exception
+
+    if tokens[localIndex]['type'] == 'RBRACE' and tokens[localIndex]['contents'] == '}':
+        localIndex += 1
+        return functionDefinition
+    else:
+        raise parse_exception
+
+def parse_Identifier(tokens):
+    global localIndex
+    identifier = {'type': 'constant'}
+    if tokens[localIndex]['type'] == 'ID':
+        identifier['contents'] = tokens[localIndex]['contents']
+        localIndex += 1
+        return identifier
+    else:
+        raise parse_exception
+
+def parse_ParamList(tokens):
+    return None
+
+def parse_CompoundStatement(tokens):
+    compoundStatement = {'type': 'compoundStatment'}
+    compoundStatement['contents'] = parse_ReturnStatemenet(tokens)
+    return compoundStatement
 
 def parse_ReturnStatemenet(tokens):
     global localIndex
     returnStatement = {'type': 'returnStatement'}
-    if tokens(localIndex)['type'] == 'KEYWORD' and tokens(localIndex)['contents'] == 'return':
+    if tokens[localIndex]['type'] == 'KEYWORD' and tokens[localIndex]['contents'] == 'return':
         localIndex += 1
         returnStatement['contents'] = parse_PrimaryExpr(tokens)
-        if tokens(localIndex)['type'] == 'SYMBOL' and tokens(localIndex)['contents'] == ';':
+        if tokens[localIndex]['type'] == 'SYMBOL' and tokens[localIndex]['contents'] == ';':
             localIndex += 1
             return returnStatement
         else:
@@ -56,7 +94,7 @@ def parse_ReturnStatemenet(tokens):
         raise parse_exception
 
 def parse_PrimaryExpr(tokens):
-    primaryExpression = {'type': 'expression'}
+    primaryExpression = {'type': 'primaryExpr'}
     primaryExpression['contents'] = parse_Expr(tokens)
     return primaryExpression
     pass
@@ -69,20 +107,41 @@ def parse_Expr(tokens): # Will need exception later
 def parse_Const(tokens):
     global localIndex
     constant = {'type': 'constant'}
-    if tokens(localIndex)['type'] == 'NUM':
-        constant['contents'] = tokens(localIndex)['contents']
+    if tokens[localIndex]['type'] == 'NUM':
+        constant['contents'] = tokens[localIndex]['contents']
         localIndex+=1
         return constant
     else:
         raise parse_exception
-def parseAssgn(tokens, index):
-    assgnExpr = {}
-    for i in range(index, len(tokens)):
-        if tokens[i]['type'] == 'keyword':
-            assgnExpr['key'] = tokens[i]['contents']
-        pass
-    return assgnExpr
 
-# for token in tokens:
-#     print(token)
-# print("\n" + str(parse(tokens)))
+def print_parseTree(parseTree):
+    print("Parse Tree:")
+    print(parseTree)
+
+#     parseLayers = list(parseTree.keys())
+#
+#     print("\n")
+#     for layer in parseLayers:
+#         if isinstance(parseTree[layer], str):
+#             print(parseTree[layer])
+#         if isinstance(parseTree[layer], dict):
+#             printLayers(parseTree[layer])
+#
+# def printLayers(dictionary):
+#     if isinstance(dictionary[layer], str):
+#         print(dictionary[layer])
+#     if isinstance(dictionary[layer], dict):
+#
+#
+#
+#
+#
+#         subDict = dictionary[layer]
+#         # print(subDict)
+#         subDictLayers = list(subDict.keys())
+#         # print(subDictLayers)
+#         for sublayer in subDictLayers:
+#             if isinstance(subDict[sublayer], str):
+#                 print('|' + subDict[sublayer])
+#             if isinstance(subDict[sublayer], dict):
+#                 print('||' + str(subDict[sublayer]))
