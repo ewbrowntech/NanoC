@@ -18,6 +18,8 @@ numFormat = {'type': 'NUM', 'pattern': re.compile(r'[0-9]+')}
 opFormat = {'type': 'OP', 'pattern': re.compile(r'[+\-*/=]')}
 lparFormat = {'type': 'LPAR', 'pattern': re.compile(r'(\()')}
 rparFormat = {'type': 'RPAR', 'pattern': re.compile(r'(\))')}
+lbraceFormat = {'type': 'LBRACE', 'pattern': re.compile(r'({)')}
+rbraceFormat = {'type': 'RBRACE', 'pattern': re.compile(r'(})')}
 symFormat = {'type': 'SYMBOL', 'pattern': re.compile(r';')}
 
 formats.append(idFormat)
@@ -25,9 +27,11 @@ formats.append(numFormat)
 formats.append(opFormat)
 formats.append(lparFormat)
 formats.append(rparFormat)
+formats.append(lbraceFormat)
+formats.append(rbraceFormat)
 formats.append(symFormat)
 
-
+keywords = ['int', 'return']
 def lexer(source):
     tokens = []
     i = 0
@@ -53,7 +57,12 @@ def lexer(source):
         if not tokensConsumed:
             print("No token generated")
             i+=1
+
+    for token in tokens:
+        if token['type'] == 'ID' and token['contents'] in keywords:
+            token['type'] = 'KEYWORD'
     return tokens
+
 
 def generate_token(match, type):
     print("Generating token...")
