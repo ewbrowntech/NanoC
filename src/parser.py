@@ -3,7 +3,7 @@ parser.py
 
 @Author - Ethan Brown - ewb0020@auburn.edu
 
-@Version - 25 OCT 22
+@Version - 31 OCT 22
 
 Parses tokens
 '''
@@ -19,7 +19,7 @@ def parse(tokens):
 
 def parse_program(tokens):
     program = {'type': 'program'}
-    program['declList'] = parse_DeclList(tokens)
+    program['declarationList'] = parse_DeclList(tokens)
     return program
 
 def parse_DeclList(tokens):
@@ -63,7 +63,7 @@ def parse_FuncDef(tokens):
 
 def parse_Identifier(tokens):
     global localIndex
-    identifier = {'type': 'constant'}
+    identifier = {'type': 'identifier'}
     if tokens[localIndex]['type'] == 'ID':
         identifier['contents'] = tokens[localIndex]['contents']
         localIndex += 1
@@ -76,7 +76,25 @@ def parse_ParamList(tokens):
 
 def parse_CompoundStatement(tokens):
     compoundStatement = {'type': 'compoundStatment'}
-    compoundStatement['contents'] = parse_ReturnStatemenet(tokens)
+    if tokens[localIndex]['type'] == 'RBRACE':
+        return None
+    elif tokens[localIndex]['contents'] == 'return':
+        compoundStatement['returnStatement'] = parse_ReturnStatemenet(tokens)
+    else:
+        compoundStatement['primaryExpression'] = parse_PrimaryExpr(tokens)
+    compoundStatement['compoundStatement'] = parse_CompoundStatement(tokens)
+    if (localIndex == len(tokens)):  # Reached the end of source code without a closing brace
+        raise parse_exception
+
+    # while(tokens[localIndex]['type'] != 'RBRACE'):
+    #     if tokens[localIndex]['contents'] == 'return':
+    #         compoundStatement['contents'].append(parse_ReturnStatemenet(tokens))
+    #     else:
+    #         compoundStatement['contents'].append(parse_PrimaryExpr(tokens))
+    #     if (localIndex == len(tokens)):                         # Reached the end of source code without a closing brace
+    #         raise parse_exception
+
+
     return compoundStatement
 
 def parse_ReturnStatemenet(tokens):
@@ -101,7 +119,10 @@ def parse_PrimaryExpr(tokens):
 
 def parse_Expr(tokens): # Will need exception later
     expression = {'type': 'expression'}
-    expression['contents'] = parse_Const(tokens)
+    if tokens[localIndex]['contents'].isnumeric():
+        expression['contents'] = parse_Const(tokens)
+    else:
+        expression['contents'] = parse_Identifier(tokens)
     return expression
 
 def parse_Const(tokens):
