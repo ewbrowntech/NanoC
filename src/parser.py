@@ -17,26 +17,21 @@ def parse(tokens):
     parseTree = parse_program(tokens)
     return parseTree
 
-def parse_program(tokens):
+def parse_program(tokens): # <program> := <declarationList>
     program = {'type': 'program'}
     program['declarationList'] = parse_DeclList(tokens)
     return program
 
-def parse_DeclList(tokens):
+def parse_DeclList(tokens): # <declarationList> := <functionDefinition>
     declarationList = {'type': 'declarationList'}
     declarationList['functionDefinition'] = parse_FuncDef(tokens)
     return declarationList
 
-def parse_FuncDef(tokens):
+def parse_FuncDef(tokens): # <functionDefinition> := <type> <id> ( <parameterList> ) { <compoundStatement> }
     global localIndex
     functionDefinition = {'type': 'functionDefinition'}
-    if tokens[localIndex]['type'] == 'TYPE':
-        functionDefinition['TYPE'] = tokens[localIndex]['contents']
-        localIndex += 1
-        functionDefinition['ID'] = parse_Identifier(tokens)
-    else:
-        print(tokens[localIndex])
-        raise parse_exception
+    functionDefinition['TYPE'] = parse_type(tokens)
+    functionDefinition['ID'] = parse_Identifier(tokens)
 
     if tokens[localIndex]['type'] == 'LPAR' and tokens[localIndex]['contents'] == '(':
         localIndex +=1
@@ -61,6 +56,17 @@ def parse_FuncDef(tokens):
     else:
         raise parse_exception
 
+def parse_type(tokens): # <type> = int
+    global localIndex
+    type = {'type': 'type'}
+    if tokens[localIndex]['type'] == 'TYPE':
+        type['contents'] = tokens[localIndex]['contents']
+        localIndex += 1
+    else:
+        print(tokens[localIndex])
+        raise parse_exception
+    return type
+
 def parse_Identifier(tokens):
     global localIndex
     identifier = {'type': 'identifier'}
@@ -74,50 +80,62 @@ def parse_Identifier(tokens):
 def parse_ParamList(tokens):
     return None
 
-def parse_CompoundStatement(tokens):
-    compoundStatement = {'type': 'compoundStatment'}
+def parse_CompoundStatement(tokens): # <compoundStatement> := <localDeclarations> <primaryStatement> <compoundStatement> | None
+    compoundStatement = {'type': 'compoundStatement'}
     if tokens[localIndex]['type'] == 'RBRACE':
         return None
-    elif tokens[localIndex]['contents'] == 'return':
-        compoundStatement['returnStatement'] = parse_ReturnStatemenet(tokens)
-    else:
-        compoundStatement['primaryExpression'] = parse_PrimaryExpr(tokens)
+    compoundStatement['localDeclarations'] = parse_localDeclarations(tokens)
+    compoundStatement['primaryStatement'] = parse_PrimaryStatement(tokens)
     compoundStatement['compoundStatement'] = parse_CompoundStatement(tokens)
     if (localIndex == len(tokens)):  # Reached the end of source code without a closing brace
         raise parse_exception
-
-    # while(tokens[localIndex]['type'] != 'RBRACE'):
-    #     if tokens[localIndex]['contents'] == 'return':
-    #         compoundStatement['contents'].append(parse_ReturnStatemenet(tokens))
-    #     else:
-    #         compoundStatement['contents'].append(parse_PrimaryExpr(tokens))
-    #     if (localIndex == len(tokens)):                         # Reached the end of source code without a closing brace
-    #         raise parse_exception
-
-
     return compoundStatement
 
-def parse_ReturnStatemenet(tokens):
+def parse_localDeclarations(tokens): # <localDeclarations> := <variableDeclaration> <localDeclarations>
+    global localIndex
+    localDeclarations = {'type': 'localDeclarations'}
+    if tokens[localIndex]['type'] == 'TYPE':
+        localDeclarations['variableDeclaration'] = parse_variableDeclaration(tokens)
+        if tokens[localIndex]['type'] == 'TYPE':
+            localDeclarations['localDeclarations'] = parse_localDeclarations(tokens)
+        return localDeclarations
+    else:
+        return None
+
+def parse_variableDeclaration(tokens): # <variableDeclaration> := <type> <identifier> ; | <type> <identifier> = <expression> ;
+    global localIndex
+    variableDeclaration = {'type': 'variableDeclaration'}
+    variableDeclaration['TYPE'] = parse_type(tokens)
+    variableDeclaration['ID'] = parse_Identifier(tokens)
+    localIndex += 1
+    return variableDeclaration
+
+def parse_PrimaryStatement(tokens): # <primaryStatement> := <returnStatement> ;
+    global localIndex
+    primaryStatement = {'type': 'primaryStatement'}
+
+    if tokens[localIndex]['contents'] == 'return':
+        primaryStatement['returnStatement'] = parse_ReturnStatemenet(tokens)
+    else:
+        primaryStatement['expression'] = parse_Expression(tokens)
+
+    if tokens[localIndex]['type'] == 'SYMBOL' and tokens[localIndex]['contents'] == ';':
+        localIndex += 1
+        return primaryStatement
+    else:
+        raise parse_exception
+
+def parse_ReturnStatemenet(tokens): # <returnStatement> := return <expression> ;
     global localIndex
     returnStatement = {'type': 'returnStatement'}
     if tokens[localIndex]['type'] == 'KEYWORD' and tokens[localIndex]['contents'] == 'return':
         localIndex += 1
-        returnStatement['contents'] = parse_PrimaryExpr(tokens)
-        if tokens[localIndex]['type'] == 'SYMBOL' and tokens[localIndex]['contents'] == ';':
-            localIndex += 1
-            return returnStatement
-        else:
-            raise parse_exception
+        returnStatement['contents'] = parse_Expression(tokens)
+        return returnStatement
     else:
         raise parse_exception
 
-def parse_PrimaryExpr(tokens):
-    primaryExpression = {'type': 'primaryExpr'}
-    primaryExpression['contents'] = parse_Expr(tokens)
-    return primaryExpression
-    pass
-
-def parse_Expr(tokens): # Will need exception later
+def parse_Expression(tokens): # Will need exception later
     expression = {'type': 'expression'}
     if tokens[localIndex]['contents'].isnumeric():
         expression['contents'] = parse_Const(tokens)
@@ -138,31 +156,3 @@ def parse_Const(tokens):
 def print_parseTree(parseTree):
     print("Parse Tree:")
     print(parseTree)
-
-#     parseLayers = list(parseTree.keys())
-#
-#     print("\n")
-#     for layer in parseLayers:
-#         if isinstance(parseTree[layer], str):
-#             print(parseTree[layer])
-#         if isinstance(parseTree[layer], dict):
-#             printLayers(parseTree[layer])
-#
-# def printLayers(dictionary):
-#     if isinstance(dictionary[layer], str):
-#         print(dictionary[layer])
-#     if isinstance(dictionary[layer], dict):
-#
-#
-#
-#
-#
-#         subDict = dictionary[layer]
-#         # print(subDict)
-#         subDictLayers = list(subDict.keys())
-#         # print(subDictLayers)
-#         for sublayer in subDictLayers:
-#             if isinstance(subDict[sublayer], str):
-#                 print('|' + subDict[sublayer])
-#             if isinstance(subDict[sublayer], dict):
-#                 print('||' + str(subDict[sublayer]))
