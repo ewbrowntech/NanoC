@@ -2,6 +2,7 @@ import sys
 from file_management import load_file
 from lexer import lexer, print_tokens
 from parser import parse, print_parseTree
+from ast import astGen, print_ast
 '''
 main.py
 
@@ -21,6 +22,9 @@ def main(args):
     parseTree = parse(tokens)
     # Parse Tree
     print_parseTree(parseTree)
+
+    ast = astGen(parseTree)
+    print_ast(ast)
 
 if __name__ == '__main__':
     main(sys.argv)

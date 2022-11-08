@@ -3,7 +3,7 @@ parser.py
 
 @Author - Ethan Brown - ewb0020@auburn.edu
 
-@Version - 31 OCT 22
+@Version - 08 NOV 22
 
 Parses tokens
 '''
@@ -98,6 +98,8 @@ def parse_localDeclarations(tokens): # <localDeclarations> := <variableDeclarati
         localDeclarations['variableDeclaration'] = parse_variableDeclaration(tokens)
         if tokens[localIndex]['type'] == 'TYPE':
             localDeclarations['localDeclarations'] = parse_localDeclarations(tokens)
+        else:
+            localDeclarations['localDeclarations'] = None
         return localDeclarations
     else:
         return None
