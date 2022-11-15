@@ -115,11 +115,13 @@ def parse_variableDeclaration(tokens): # <variableDeclaration> := <type> <identi
     localIndex += 1
     return variableDeclaration
 
-def parse_PrimaryStatement(tokens): # <primaryStatement> := <returnStatement> ;
+def parse_PrimaryStatement(tokens): # <primaryStatement> := <assignmentExpression> | <returnStatement> ;
     global localIndex
     primaryStatement = {'type': 'primaryStatement'}
 
-    if tokens[localIndex]['contents'] == 'return':
+    if tokens[localIndex]['type'] == 'ID':
+        primaryStatement['assignmentExpression'] = parse_assignementExpression(tokens)
+    elif tokens[localIndex]['contents'] == 'return':
         primaryStatement['returnStatement'] = parse_ReturnStatemenet(tokens)
     else:
         primaryStatement['expression'] = parse_Expression(tokens)
@@ -128,7 +130,19 @@ def parse_PrimaryStatement(tokens): # <primaryStatement> := <returnStatement> ;
         localIndex += 1
         return primaryStatement
     else:
+        # print(tokens[localIndex])
         raise parse_exception
+
+def parse_assignementExpression(tokens): # <assignementExpression> := <identifier> = <expression>
+    global localIndex
+    assignementExpression = {'type': 'assignementExpression'}
+    assignementExpression['identifier'] = parse_Identifier(tokens)
+    if tokens[localIndex]['contents'] == '=':
+        localIndex += 1
+        assignementExpression['expression'] = parse_Expression(tokens)
+    else:
+        raise parse_exception
+    return assignementExpression
 
 def parse_ReturnStatemenet(tokens): # <returnStatement> := return <expression> ;
     global localIndex
@@ -140,7 +154,8 @@ def parse_ReturnStatemenet(tokens): # <returnStatement> := return <expression> ;
     else:
         raise parse_exception
 
-def parse_Expression(tokens): # Will need exception later
+def parse_Expression(tokens): # <expression> := <constant> | <identifier> | <expression> <op> <expression>
+    global localIndex
     expression = {'type': 'expression'}
     if tokens[localIndex]['contents'].isnumeric():
         expression['contents'] = parse_Const(tokens)
