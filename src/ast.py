@@ -76,14 +76,18 @@ def add_LocalDeclarations(compoundStatementNode, localDeclarations): # this is r
 
 def add_Expression(expression):
     expressionNode = {}
-    contents = expression['contents']
-    if contents['type'] == 'constant':
-        expressionNode[contents['contents']] = {} 
+    expressionKeys = expression.keys()
+    constant = expression['constant']
+    if constant['type'] == 'constant':
+        expressionNode[constant['contents']] = {} 
+    if 'op' in expressionKeys:
+        expressionNode[expression['op']] = {} # This will be changed such that expressionNodes are lists instead of dictionaries
+        expressionNode[expression['expression']['constant']['contents']] = {}
     return expressionNode
 
 def add_ReturnStatemenet(compoundStatementNode, returnStatement): # right now primary statement is 
     expression = returnStatement['contents']                      # only a return statement
-    constant = expression['contents']                             # no arithmetic yet
+    constant = expression['constant']                             # no arithmetic yet
     compoundStatementNode['return'] = add_Constant(constant)
     return compoundStatementNode   
 
