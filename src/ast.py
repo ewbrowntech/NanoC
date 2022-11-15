@@ -23,17 +23,22 @@ def print_ast(ast):
 def add_funcDef(functionDefinition): # Begin descending down functionDefinition
     functionDefNode = {}
     compoundStatement = functionDefinition['compoundStatement']
-    functionDefNode[functionDefinition['ID']['contents']] = add_CompoundStatement(compoundStatement)
+    functionDefNode[functionDefinition['ID']['contents']] = add_CompoundStatement(None, compoundStatement)
     return functionDefNode
 
-def add_CompoundStatement(compoundStatement):
-    compoundStatementNode = {}
-    if compoundStatement['localDeclarations'] != None:
+def add_CompoundStatement(compoundStatementNode, compoundStatement):
+    if compoundStatementNode == None:
+        compoundStatementNode = {}
+    statementKeys = compoundStatement.keys()
+    if 'localDeclarations' in statementKeys and compoundStatement['localDeclarations'] != None:
         localDeclarations = compoundStatement['localDeclarations']
         compoundStatementNode = add_LocalDeclarations(compoundStatementNode, localDeclarations) # modifying existing
-    primaryStatement = compoundStatement['primaryStatement']                                    # compound statement
-    returnStatement = primaryStatement['returnStatement']
-    compoundStatementNode = add_ReturnStatemenet(compoundStatementNode, returnStatement) # modifying existing
+    if 'primaryStatement' in statementKeys and compoundStatement['primaryStatement'] != None:
+        primaryStatement = compoundStatement['primaryStatement']                                    # compound statement
+        returnStatement = primaryStatement['returnStatement']
+        compoundStatementNode = add_ReturnStatemenet(compoundStatementNode, returnStatement) # modifying existing
+    if compoundStatement['compoundStatement'] != None:
+        compoundStatementNode = add_CompoundStatement(compoundStatementNode, compoundStatement['compoundStatement'])  
     return compoundStatementNode                                                         # compound statement
 
 def add_LocalDeclarations(compoundStatementNode, localDeclarations): # this is recursive
@@ -52,11 +57,11 @@ def add_LocalDeclarations(compoundStatementNode, localDeclarations): # this is r
     # constContents = constant['contents']
     # compoundStatementNode[idContents] = {}
     # compoundStatementNode[idContents][constContents] = {}
-    print("\n" + str(localDeclarations))  
-    print("\n" + str(variableDeclaration))
-    print("\n" + str(identifier))
-    print("\n" + str(contents))
-    print("\n" + str(nestedLocalDeclarations))
+    # print("\n" + str(localDeclarations))  
+    # print("\n" + str(variableDeclaration))
+    # print("\n" + str(identifier))
+    # print("\n" + str(contents))
+    # print("\n" + str(nestedLocalDeclarations))
     return compoundStatementNode
 
 def add_ReturnStatemenet(compoundStatementNode, returnStatement): # right now primary statement is 
@@ -69,4 +74,4 @@ def add_Constant(constant):
     constantNode = {}
     constantNode[constant['contents']] = {}
     return constantNode           
-
+    
