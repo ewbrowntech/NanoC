@@ -3,7 +3,7 @@ ast.py
 
 @Author - Shanti Upadhyay - spu0004@auburn.edu
 
-@Version - 08 NOV 22
+@Version - 15 NOV 22
 
 Generates AST from Parse Tree
 '''
@@ -32,14 +32,24 @@ def add_CompoundStatement(compoundStatementNode, compoundStatement):
     statementKeys = compoundStatement.keys()
     if 'localDeclarations' in statementKeys and compoundStatement['localDeclarations'] != None:
         localDeclarations = compoundStatement['localDeclarations']
-        compoundStatementNode = add_LocalDeclarations(compoundStatementNode, localDeclarations) # modifying existing
+        compoundStatementNode = add_LocalDeclarations(compoundStatementNode, localDeclarations) 
     if 'primaryStatement' in statementKeys and compoundStatement['primaryStatement'] != None:
-        primaryStatement = compoundStatement['primaryStatement']                                    # compound statement
-        returnStatement = primaryStatement['returnStatement']
-        compoundStatementNode = add_ReturnStatemenet(compoundStatementNode, returnStatement) # modifying existing
+        primaryStatement = compoundStatement['primaryStatement']
+        if 'returnStatement' in primaryStatement.keys():
+            returnStatement = primaryStatement['returnStatement']
+            compoundStatementNode = add_ReturnStatemenet(compoundStatementNode, returnStatement)
+        elif 'assignmentExpression' in primaryStatement.keys():
+            assignmentExpression = primaryStatement['assignmentExpression']
+            identifier = assignmentExpression['identifier']
+            nodeKeys = compoundStatementNode.keys()
+            if identifier['contents'] in nodeKeys:
+                expression = assignmentExpression['expression']
+                compoundStatementNode[identifier['contents']] = add_Expression(expression)
+        else:
+            raise astException 
     if compoundStatement['compoundStatement'] != None:
         compoundStatementNode = add_CompoundStatement(compoundStatementNode, compoundStatement['compoundStatement'])  
-    return compoundStatementNode                                                         # compound statement
+    return compoundStatementNode                                                        
 
 def add_LocalDeclarations(compoundStatementNode, localDeclarations): # this is recursive
     variableDeclaration = localDeclarations['variableDeclaration']
@@ -63,6 +73,13 @@ def add_LocalDeclarations(compoundStatementNode, localDeclarations): # this is r
     # print("\n" + str(contents))
     # print("\n" + str(nestedLocalDeclarations))
     return compoundStatementNode
+
+def add_Expression(expression):
+    expressionNode = {}
+    contents = expression['contents']
+    if contents['type'] == 'constant':
+        expressionNode[contents['contents']] = {} 
+    return expressionNode
 
 def add_ReturnStatemenet(compoundStatementNode, returnStatement): # right now primary statement is 
     expression = returnStatement['contents']                      # only a return statement
