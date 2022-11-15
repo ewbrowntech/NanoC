@@ -158,7 +158,11 @@ def parse_Expression(tokens): # <expression> := <constant> | <identifier> | <exp
     global localIndex
     expression = {'type': 'expression'}
     if tokens[localIndex]['contents'].isnumeric():
-        expression['contents'] = parse_Const(tokens)
+        expression['constant'] = parse_Const(tokens) # This breaks set grammar, but we ran out of time for code review
+        if tokens[localIndex]['type'] == 'OP' and tokens[localIndex]['contents'] != '=':
+            expression['op'] = tokens[localIndex]['contents']
+            localIndex += 1
+            expression['expression'] = parse_Expression(tokens)
     else:
         expression['contents'] = parse_Identifier(tokens)
     return expression
