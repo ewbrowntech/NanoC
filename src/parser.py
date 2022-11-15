@@ -80,12 +80,15 @@ def parse_Identifier(tokens):
 def parse_ParamList(tokens):
     return None
 
-def parse_CompoundStatement(tokens): # <compoundStatement> := <localDeclarations> <primaryStatement> <compoundStatement> | None
+def parse_CompoundStatement(tokens): # <compoundStatement> := <localDeclarations> <compoundStatement> | <primaryStatement> <compoundStatement> | None
+    global localIndex
     compoundStatement = {'type': 'compoundStatement'}
     if tokens[localIndex]['type'] == 'RBRACE':
         return None
-    compoundStatement['localDeclarations'] = parse_localDeclarations(tokens)
-    compoundStatement['primaryStatement'] = parse_PrimaryStatement(tokens)
+    if tokens[localIndex]['type'] == 'TYPE':
+        compoundStatement['localDeclarations'] = parse_localDeclarations(tokens)
+    else:
+        compoundStatement['primaryStatement'] = parse_PrimaryStatement(tokens)
     compoundStatement['compoundStatement'] = parse_CompoundStatement(tokens)
     if (localIndex == len(tokens)):  # Reached the end of source code without a closing brace
         raise parse_exception
