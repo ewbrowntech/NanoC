@@ -92,15 +92,22 @@ def get_localDeclarations(functionDefNode, compoundstatements):
 
     #check for variable declaration before use
     if 'compoundStatement' in compoundstatements and compoundstatements['compoundStatement'] != None:
+        check_expressions(functionDefNode, compoundstatements)
+        
+    return functionDefNode
+
+
+
+def check_expressions(functionDefNode, compoundstatements):
+
         compoundStatement = compoundstatements['compoundStatement']
         primaryStatement = compoundStatement['primaryStatement']
         assignmentExpression = primaryStatement['assignmentExpression']
         assignedVar = assignmentExpression['identifier']['contents']
         check_VarDeclaration(functionDefNode, assignedVar)
-        
 
-
-    return functionDefNode
+        if 'compoundStatement' in compoundStatement and compoundStatement['compoundStatement'] != None:
+            check_expressions(functionDefNode, compoundStatement)
 
 
 
