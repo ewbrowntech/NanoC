@@ -5,6 +5,9 @@
     2. syntax error
     3. parse error
     4. other errors
+
+    @ Author: Paul Atilola
+    @version: Nov 18, 2022
 """
 
 
