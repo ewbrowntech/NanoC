@@ -1,62 +1,63 @@
-'''
+"""
 parser.py
 
 @Author - Ethan Brown - ewb0020@auburn.edu
 
-@Version - 08 NOV 22
+@Version - 17 NOV 22
 
 Parses tokens
-'''
+"""
 
-class parse_exception(Exception):
-    pass
-
-localIndex = 0
 
 def parse(tokens):
     parseTree = parse_program(tokens)
     return parseTree
 
-def parse_program(tokens): # <program> := <declarationList>
-    program = {'type': 'program'}
-    program['declarationList'] = parse_DeclList(tokens)
+class parseException(Exception):
+    pass
+
+localIndex = 0
+
+# <program> := <declarationList>
+def parse_program(tokens):
+    program = {'type': 'program', 'declarationList': parse_declarationList(tokens)}
     return program
 
-def parse_DeclList(tokens): # <declarationList> := <functionDefinition>
-    declarationList = {'type': 'declarationList'}
-    declarationList['functionDefinition'] = parse_FuncDef(tokens)
+# <declarationList> := <functionDefinition> FOR NOW
+def parse_declarationList(tokens):  # <declarationList> := <functionDefinition>
+    declarationList = {'type': 'declarationList', 'functionDefinition': parse_functionDefinition(tokens)}
     return declarationList
 
-def parse_FuncDef(tokens): # <functionDefinition> := <type> <id> ( <parameterList> ) { <compoundStatement> }
+# <functionDefinition> := <type> <id> ( <parameterList> ) { <compoundStatement> }
+def parse_functionDefinition(tokens):
     global localIndex
-    functionDefinition = {'type': 'functionDefinition'}
-    functionDefinition['TYPE'] = parse_type(tokens)
-    functionDefinition['ID'] = parse_Identifier(tokens)
+    functionDefinition = {'type': 'functionDefinition', 'TYPE': parse_type(tokens), 'ID': parse_identifier(tokens)}
 
     if tokens[localIndex]['type'] == 'LPAR' and tokens[localIndex]['contents'] == '(':
-        localIndex +=1
-        functionDefinition['params'] = parse_ParamList(tokens)
+        localIndex += 1
+        functionDefinition['parameterList'] = None
     else:
-        raise parse_exception
+        raise parseException
 
     if tokens[localIndex]['type'] == 'RPAR' and tokens[localIndex]['contents'] == ')':
         localIndex += 1
     else:
-        raise parse_exception
+        raise parseException
 
     if tokens[localIndex]['type'] == 'LBRACE' and tokens[localIndex]['contents'] == '{':
         localIndex += 1
         functionDefinition['compoundStatement'] = parse_CompoundStatement(tokens)
     else:
-        raise parse_exception
+        raise parseException
 
     if tokens[localIndex]['type'] == 'RBRACE' and tokens[localIndex]['contents'] == '}':
         localIndex += 1
         return functionDefinition
     else:
-        raise parse_exception
+        raise parseException
 
-def parse_type(tokens): # <type> = int
+# <type> = int
+def parse_type(tokens):
     global localIndex
     type = {'type': 'type'}
     if tokens[localIndex]['type'] == 'TYPE':
@@ -64,10 +65,11 @@ def parse_type(tokens): # <type> = int
         localIndex += 1
     else:
         print(tokens[localIndex])
-        raise parse_exception
+        raise parseException
     return type
 
-def parse_Identifier(tokens):
+# <identifier> := string
+def parse_identifier(tokens):
     global localIndex
     identifier = {'type': 'identifier'}
     if tokens[localIndex]['type'] == 'ID':
@@ -75,12 +77,14 @@ def parse_Identifier(tokens):
         localIndex += 1
         return identifier
     else:
-        raise parse_exception
+        raise parseException
 
-def parse_ParamList(tokens):
+# <parameterList> = <identifier> <parameterList> | <variableDeclaration> <parameterList> | None
+def parse_parameterList():
     return None
 
-def parse_CompoundStatement(tokens): # <compoundStatement> := <localDeclarations> <compoundStatement> | <primaryStatement> <compoundStatement> | None
+# <compoundStatement> := <localDeclarations> <compoundStatement> | <primaryStatement> <compoundStatement> | None
+def parse_CompoundStatement(tokens):
     global localIndex
     compoundStatement = {'type': 'compoundStatement'}
     if tokens[localIndex]['type'] == 'RBRACE':
@@ -88,13 +92,14 @@ def parse_CompoundStatement(tokens): # <compoundStatement> := <localDeclarations
     if tokens[localIndex]['type'] == 'TYPE':
         compoundStatement['localDeclarations'] = parse_localDeclarations(tokens)
     else:
-        compoundStatement['primaryStatement'] = parse_PrimaryStatement(tokens)
+        compoundStatement['primaryStatement'] = parse_primaryStatement(tokens)
     compoundStatement['compoundStatement'] = parse_CompoundStatement(tokens)
-    if (localIndex == len(tokens)):  # Reached the end of source code without a closing brace
-        raise parse_exception
+    if localIndex == len(tokens):  # Reached the end of source code without a closing brace
+        raise parseException
     return compoundStatement
 
-def parse_localDeclarations(tokens): # <localDeclarations> := <variableDeclaration> <localDeclarations>
+# <localDeclarations> := <variableDeclaration> <localDeclarations>
+def parse_localDeclarations(tokens):
     global localIndex
     localDeclarations = {'type': 'localDeclarations'}
     if tokens[localIndex]['type'] == 'TYPE':
@@ -107,76 +112,79 @@ def parse_localDeclarations(tokens): # <localDeclarations> := <variableDeclarati
     else:
         return None
 
-def parse_variableDeclaration(tokens): # <variableDeclaration> := <type> <identifier> ; | <type> <identifier> = <expression> ;
+# <variableDeclaration> := <type> <identifier> ; | <type> <identifier> = <expression> ;
+def parse_variableDeclaration(tokens):
     global localIndex
-    variableDeclaration = {'type': 'variableDeclaration'}
-    variableDeclaration['TYPE'] = parse_type(tokens)
-    variableDeclaration['ID'] = parse_Identifier(tokens)
+    variableDeclaration = {'type': 'variableDeclaration', 'TYPE': parse_type(tokens), 'ID': parse_identifier(tokens)}
     localIndex += 1
     return variableDeclaration
 
-def parse_PrimaryStatement(tokens): # <primaryStatement> := <assignmentExpression> | <returnStatement> ;
+# <primaryStatement> := <assignmentExpression> | <returnStatement> ;
+def parse_primaryStatement(tokens):
     global localIndex
     primaryStatement = {'type': 'primaryStatement'}
 
     if tokens[localIndex]['type'] == 'ID':
-        primaryStatement['assignmentExpression'] = parse_assignementExpression(tokens)
+        primaryStatement['assignmentExpression'] = parse_assignmentExpression(tokens)
     elif tokens[localIndex]['contents'] == 'return':
-        primaryStatement['returnStatement'] = parse_ReturnStatemenet(tokens)
+        primaryStatement['returnStatement'] = parse_returnStatement(tokens)
     else:
-        primaryStatement['expression'] = parse_Expression(tokens)
+        primaryStatement['expression'] = parse_expression(tokens)
 
     if tokens[localIndex]['type'] == 'SYMBOL' and tokens[localIndex]['contents'] == ';':
         localIndex += 1
         return primaryStatement
     else:
         # print(tokens[localIndex])
-        raise parse_exception
+        raise parseException
 
-def parse_assignementExpression(tokens): # <assignementExpression> := <identifier> = <expression>
+# <assignmentExpression> := <identifier> = <expression>
+def parse_assignmentExpression(tokens):
     global localIndex
-    assignementExpression = {'type': 'assignementExpression'}
-    assignementExpression['identifier'] = parse_Identifier(tokens)
+    assignmentExpression = {'type': 'assignmentExpression', 'identifier': parse_identifier(tokens)}
     if tokens[localIndex]['contents'] == '=':
         localIndex += 1
-        assignementExpression['expression'] = parse_Expression(tokens)
+        assignmentExpression['expression'] = parse_expression(tokens)
     else:
-        raise parse_exception
-    return assignementExpression
+        raise parseException
+    return assignmentExpression
 
-def parse_ReturnStatemenet(tokens): # <returnStatement> := return <expression> ;
+# <returnStatement> := return <expression> ;
+def parse_returnStatement(tokens):
     global localIndex
     returnStatement = {'type': 'returnStatement'}
     if tokens[localIndex]['type'] == 'KEYWORD' and tokens[localIndex]['contents'] == 'return':
         localIndex += 1
-        returnStatement['contents'] = parse_Expression(tokens)
+        returnStatement['contents'] = parse_expression(tokens)
         return returnStatement
     else:
-        raise parse_exception
+        raise parseException
 
-def parse_Expression(tokens): # <expression> := <constant> | <identifier> | <expression> <op> <expression>
+# <expression> := <constant> | <identifier> | <expression> <op> <expression>
+def parse_expression(tokens):
     global localIndex
     expression = {'type': 'expression'}
     if tokens[localIndex]['contents'].isnumeric():
-        expression['constant'] = parse_Const(tokens) # This breaks set grammar, but we ran out of time for code review
+        expression['constant'] = parse_constant(tokens)    # This breaks set grammar
         if tokens[localIndex]['type'] == 'OP' and tokens[localIndex]['contents'] != '=':
             expression['op'] = tokens[localIndex]['contents']
             localIndex += 1
-            expression['expression'] = parse_Expression(tokens)
+            expression['expression'] = parse_expression(tokens)
     else:
-        expression['contents'] = parse_Identifier(tokens)
+        expression['contents'] = parse_identifier(tokens)
     return expression
 
-def parse_Const(tokens):
+# <constant> := num
+def parse_constant(tokens):
     global localIndex
     constant = {'type': 'constant'}
     if tokens[localIndex]['type'] == 'NUM':
         constant['contents'] = tokens[localIndex]['contents']
-        localIndex+=1
+        localIndex += 1
         return constant
     else:
-        raise parse_exception
+        raise parseException
 
 def print_parseTree(parseTree):
-    print("Parse Tree:")
+    print("\nParse Tree:")
     print(parseTree)
