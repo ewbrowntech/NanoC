@@ -15,16 +15,23 @@
     parameters (function), and variables properties under each function
 '''
 
+import errors
+
+
 def generate_symbolTable(psrseTree):
     symbolTable = dict()
 
-    symbolTable = get_declarationList(psrseTree)
+    symbolTable, undeclaredList = get_declarationList(psrseTree)
 
-    return symbolTable
+    if not undeclaredList:
+        return symbolTable
+    else:
+        errors.variableNotDeclared(undeclaredList)
 
 
 def get_declarationList(parseTree):
     declarationListNode = dict()
+    undeclaredList = dict()
 
     declarationList = parseTree['declarationList']       #get the top level program from psrdstree
 
@@ -33,22 +40,25 @@ def get_declarationList(parseTree):
         declarationListNode[globalVariables['ID']['contents']] = get_globalVariables(globalVariables)
 
     else:
-        print('\n------------------\n')
+        print('\n')
+        #print('\n----------------'\n)
         print('No global variables declared: ')
 
  
     for key in declarationList:
         if key == 'functionDefinition':
             functionDefinition = declarationList['functionDefinition']
-            declarationListNode[functionDefinition['ID']['contents']] = get_function(None, functionDefinition)
+            functionName = functionDefinition['ID']['contents']
+            declarationListNode[functionName], undeclaredList[functionName] = get_function(None, functionDefinition)
 
     functionDefinition = declarationList['functionDefinition']
     if 'functionDefinition' in functionDefinition:
         functiondefinition = functionDefinition['functionDefinition']
-        declarationListNode[functiondefinition['ID']['contents']] = get_function[None, functiondefinition]
+        functionName = functionDefinition['ID']['contents']
+        declarationListNode[functionName], undeclaredList[functionName] = get_function(None, functiondefinition)
 
 
-    return declarationListNode
+    return declarationListNode, undeclaredList
 
 
 
@@ -62,24 +72,26 @@ def print_symbolTable(symbolTable):
 #parse through each function in the delcaration list 
 def get_function(functionDefNode, functionDefinition):
 
+    undeclaredVars = list()
+
     if functionDefNode == None:
         functionDefNode = dict()
 
-    functionDefNode['rtype'] = functionDefinition['TYPE']['contents']
+    functionDefNode['returnType'] = functionDefinition['TYPE']['contents']
 
     if functionDefinition['compoundStatement'] != None:
         compoundstatements = functionDefinition['compoundStatement']
         if 'localDeclarations' in compoundstatements and compoundstatements['localDeclarations'] != None:
-            functionDefNode = get_localDeclarations(functionDefNode, compoundstatements)
+            functionDefNode, undeclaredVars = get_localDeclarations(functionDefNode, compoundstatements, undeclaredVars)
 
 
         
 
-    return functionDefNode
+    return functionDefNode, undeclaredVars
 
 
 #parse through the local declarations to get local variables in function
-def get_localDeclarations(functionDefNode, compoundstatements):
+def get_localDeclarations(functionDefNode, compoundstatements, undeclaredVars):
     localDeclarations = compoundstatements['localDeclarations']
 
     if 'variableDeclaration' in localDeclarations:
@@ -88,26 +100,36 @@ def get_localDeclarations(functionDefNode, compoundstatements):
         functionDefNode[variableName] = get_variableType(variableDeclaration)
 
     if 'localDeclarations' in localDeclarations and localDeclarations['localDeclarations'] !=None:
-        functionDefNode = get_localDeclarations(functionDefNode, localDeclarations)
+        functionDefNode, undeclaredVars = get_localDeclarations(functionDefNode, localDeclarations, undeclaredVars)
 
     #check for variable declaration before use
     if 'compoundStatement' in compoundstatements and compoundstatements['compoundStatement'] != None:
-        check_expressions(functionDefNode, compoundstatements)
+        undeclaredVars = check_expressions(functionDefNode, compoundstatements, undeclaredVars)
         
-    return functionDefNode
+    return functionDefNode, undeclaredVars
 
 
 
-def check_expressions(functionDefNode, compoundstatements):
+def check_expressions(functionDefNode, compoundstatements, undeclaredVars):
 
         compoundStatement = compoundstatements['compoundStatement']
         primaryStatement = compoundStatement['primaryStatement']
-        assignmentExpression = primaryStatement['assignmentExpression']
-        assignedVar = assignmentExpression['identifier']['contents']
-        check_VarDeclaration(functionDefNode, assignedVar)
+        if 'assignmentExpression' in primaryStatement:
+            assignmentExpression = primaryStatement['assignmentExpression']
+            assignedVar = assignmentExpression['identifier']['contents']
+            undeclaredVars = check_VarDeclaration(functionDefNode, assignedVar, undeclaredVars)
+
+            if 'expression' in assignmentExpression:
+                expression = assignmentExpression['expression']
+                undeclaredVars = check_rExpression(functionDefNode, expression, undeclaredVars)
 
         if 'compoundStatement' in compoundStatement and compoundStatement['compoundStatement'] != None:
-            check_expressions(functionDefNode, compoundStatement)
+            undeclaredVars = check_expressions(functionDefNode, compoundStatement, undeclaredVars)
+
+
+        return undeclaredVars
+
+
 
 
 
@@ -120,11 +142,31 @@ def get_variableType(variableDeclaration):
     return variableType
 
 
+
+
+#check right hand expressions for varible being declared
+def check_rExpression(functionDefNode, expression, undeclaredVars):
+    if 'expression' in expression:
+        expr = expression['expression']
+        exprVar = expr['contents']['contents']
+        undeclaredVars = check_VarDeclaration(functionDefNode, exprVar, undeclaredVars)
+
+        if 'expression' in expr:
+            undeclaredVars = check_rExpression(functionDefNode, expr, undeclaredVars)
+
+    return undeclaredVars
+
+
+
+
 #variable declaration checker
-def check_VarDeclaration(functionDefNode, assignedVar):
+def check_VarDeclaration(functionDefNode, assignedVar, undeclaredVars):
     if assignedVar != None:
         if assignedVar not in functionDefNode:
-            raise Exception('assigned variable "{}" was never declared \n' .format(assignedVar))
+            undeclaredVars.append(assignedVar)
+
+    return undeclaredVars
+           
             
 
 #add global variables to symbol table
