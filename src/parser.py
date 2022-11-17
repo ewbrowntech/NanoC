@@ -186,5 +186,5 @@ def parse_constant(tokens):
         raise parseException
 
 def print_parseTree(parseTree):
-    print("Parse Tree:")
+    print("\nParse Tree:")
     print(parseTree)
