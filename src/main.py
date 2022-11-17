@@ -4,6 +4,7 @@ from lexer import lexer, print_tokens
 from parser import parse, print_parseTree
 from ast import astGen, print_ast
 from symbol_table import generate_symbolTable, print_symbolTable
+
 '''
 main.py
 
@@ -27,18 +28,16 @@ def main():
     fileContents = load_file(args.filename)
 
     # Perform compilation of source file
-    tokens = lexer(fileContents)
-    parseTree = parse(tokens)
-    ast = astGen(parseTree)
-    symbolTable = generate_symbolTable(parseTree)
-
-    # Print output of components
+    tokens = lexer(fileContents)  # Scan in source code as list of tokens
     if args.tokens:
         print_tokens(tokens)
+    parseTree = parse(tokens)  # Parse tokens into a grammatical parse tree
     if args.parseTree:
         print_parseTree(parseTree)
+    ast = astGen(parseTree)  # Transform parse tree into an abstract syntax tree
     if args.ast:
         print_ast(ast)
+    symbolTable = generate_symbolTable(parseTree)  # Traverse parse tree to build a symbol table
     if args.symbolTable:
         print_symbolTable(symbolTable)
 

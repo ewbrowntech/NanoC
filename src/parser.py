@@ -3,7 +3,7 @@ parser.py
 
 @Author - Ethan Brown - ewb0020@auburn.edu
 
-@Version - 08 NOV 22
+@Version - 17 NOV 22
 
 Parses tokens
 """
