@@ -3,7 +3,7 @@ parser.py
 
 @Author - Ethan Brown - ewb0020@auburn.edu
 
-@Version - 17 NOV 22
+@Version - 27 NOV 22
 
 Parses tokens
 """
@@ -164,16 +164,25 @@ def parse_returnStatement(tokens):
 def parse_expression(tokens):
     global localIndex
     expression = {'type': 'expression'}
-    if tokens[localIndex]['contents'].isnumeric():
-        expression['constant'] = parse_constant(tokens)    # This breaks set grammar
-        if tokens[localIndex]['type'] == 'OP' and tokens[localIndex]['contents'] != '=':
-            expression['op'] = tokens[localIndex]['contents']
-            localIndex += 1
-            expression['expression'] = parse_expression(tokens)
+    if tokens[localIndex + 1]['type'] == 'OP' and tokens[localIndex + 1]['contents'] != '=':
+        expression['binaryExpression'] = parse_binaryExpression(tokens)
+        print("Binary Expression")
+    elif tokens[localIndex]['contents'].isnumeric():
+        expression['constant'] = parse_constant(tokens)
     else:
         expression['contents'] = parse_identifier(tokens)
     return expression
 
+# <binaryExpression> := <expression> <op> <expression>
+def parse_binaryExpression(tokens):
+    global localIndex
+    binaryExpression = {'type': 'binaryExpression'}
+    binaryExpression['op'] = tokens[localIndex + 1]
+    tokens.pop(localIndex + 1)
+    binaryExpression['expression1'] = parse_expression(tokens)
+    binaryExpression['expression2'] = parse_expression(tokens)
+
+    return binaryExpression
 # <constant> := num
 def parse_constant(tokens):
     global localIndex
