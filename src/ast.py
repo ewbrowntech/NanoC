@@ -43,7 +43,6 @@ def add_compoundStatement(compoundStatementNode, compoundStatement):
             assignmentExpression = primaryStatement['assignmentExpression']
             identifier = assignmentExpression['identifier']
             nodeKeys = compoundStatementNode.keys()
-            print(nodeKeys)
             if identifier['contents'] in nodeKeys:
                 expression = assignmentExpression['expression']
                 compoundStatementNode[identifier['contents']] = add_expression(expression)
@@ -69,7 +68,6 @@ def add_expression(expression):
     expressionNode = {}
     if 'binaryExpression' in expression:
         binaryExpression = expression['binaryExpression']
-        print("\n" + str(binaryExpression))
         expressionNode = add_binaryExpression(binaryExpression)
     elif 'constant' in expression:
         expressionNode = add_constant(expression['constant'])
