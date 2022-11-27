@@ -4,7 +4,7 @@ ast.py
 @Author - Shanti Upadhyay - spu0004@auburn.edu
 @Author - Ethan Brown - ewb0020@auburn.edu
 
-@Version - 19 NOV 22
+@Version - 27 NOV 22
 
 Generates AST from Parse Tree
 '''
@@ -43,9 +43,12 @@ def add_compoundStatement(compoundStatementNode, compoundStatement):
             assignmentExpression = primaryStatement['assignmentExpression']
             identifier = assignmentExpression['identifier']
             nodeKeys = compoundStatementNode.keys()
+            print(nodeKeys)
             if identifier['contents'] in nodeKeys:
                 expression = assignmentExpression['expression']
                 compoundStatementNode[identifier['contents']] = add_expression(expression)
+            else:
+                raise astException
         else:
             raise astException 
     if compoundStatement['compoundStatement'] != None:
@@ -64,14 +67,21 @@ def add_localDeclarations(compoundStatementNode, localDeclarations): # this is r
 
 def add_expression(expression):
     expressionNode = {}
-    expressionKeys = expression.keys()
-    constant = expression['constant']
-    if constant['type'] == 'constant':
-        expressionNode[constant['contents']] = {} 
-    if 'op' in expressionKeys:
-        expressionNode[expression['op']] = {} # This will be changed such that expressionNodes are lists instead of dictionaries
-        expressionNode[expression['expression']['constant']['contents']] = {}
+    if 'binaryExpression' in expression:
+        binaryExpression = expression['binaryExpression']
+        print("\n" + str(binaryExpression))
+        expressionNode = add_binaryExpression(binaryExpression)
+    elif 'constant' in expression:
+        expressionNode = add_constant(expression['constant'])
     return expressionNode
+
+def add_binaryExpression(binaryExpression):
+    binaryExpressionNode = {}
+    op = binaryExpression['op']['contents']
+    expression1 = binaryExpression['expression1']
+    expression2 = binaryExpression['expression2']
+    binaryExpressionNode[op] = [add_expression(expression1), add_expression(expression2)]
+    return binaryExpressionNode
 
 def add_returnStatement(compoundStatementNode, returnStatement): # right now primary statement is
     expression = returnStatement['contents']                      # only a return statement
@@ -80,7 +90,5 @@ def add_returnStatement(compoundStatementNode, returnStatement): # right now pri
     return compoundStatementNode   
 
 def add_constant(constant):
-    constantNode = {}
-    constantNode[constant['contents']] = {}
-    return constantNode           
+    return constant['contents']
     
