@@ -4,7 +4,7 @@ ast.py
 @Author - Shanti Upadhyay - spu0004@auburn.edu
 @Author - Ethan Brown - ewb0020@auburn.edu
 
-@Version - 27 NOV 22
+@Version - 28 NOV 22
 
 Generates AST from Parse Tree
 '''
@@ -40,7 +40,7 @@ def add_compoundStatement(compoundStatementNode, compoundStatement, localVariabl
         primaryStatement = compoundStatement['primaryStatement']
         if 'returnStatement' in primaryStatement.keys():
             returnStatement = primaryStatement['returnStatement']
-            compoundStatementNode = add_returnStatement(compoundStatementNode, returnStatement)
+            compoundStatementNode = add_returnStatement(compoundStatementNode, returnStatement, localVariables)
         elif 'assignmentExpression' in primaryStatement.keys():
             assignmentExpression = primaryStatement['assignmentExpression']
             compoundStatementNode = add_assignmentExpression(compoundStatementNode, assignmentExpression, localVariables)
@@ -93,10 +93,9 @@ def add_binaryExpression(binaryExpression, localNode, variables):
     binaryExpressionNode[op] = [add_expression(expression1, localNode, variables), add_expression(expression2, localNode, variables)]
     return binaryExpressionNode
 
-def add_returnStatement(compoundStatementNode, returnStatement): # right now primary statement is
-    expression = returnStatement['contents']                      # only a return statement
-    constant = expression['constant']                             # no arithmetic yet
-    compoundStatementNode['return'] = add_constant(constant)
+def add_returnStatement(compoundStatementNode, returnStatement, localVariables):
+    expression = returnStatement['contents']
+    compoundStatementNode['return'] = add_expression(expression, compoundStatementNode, localVariables)
     return compoundStatementNode   
 
 def add_constant(constant):
