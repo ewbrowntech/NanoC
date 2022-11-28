@@ -170,7 +170,7 @@ def parse_expression(tokens):
     elif tokens[localIndex]['contents'].isnumeric():
         expression['constant'] = parse_constant(tokens)
     else:
-        expression['contents'] = parse_identifier(tokens)
+        expression['identifier'] = parse_identifier(tokens)
     return expression
 
 # <binaryExpression> := <expression> <op> <expression>
