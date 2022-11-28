@@ -17,6 +17,19 @@ def variableNotDeclared(listOfVariables):
         for funcName, varlist in listOfVariables.items():
             if varlist:
                 for var in varlist:
-                    print('Error: "{}" not declared before use in "{}"'.format(var, funcName))
+                    if var.endswith('+'):
+                        variableNotAssigned(var, funcName)
+                    else:
+                        print('ValueError: "{}" not declared before use in "{}"'.format(var, funcName))
 
+
+
+
+
+
+# ERROR WHEN DECLARED VARIABLE IN EXPRESSION IS NOT ASSIGNED
+def variableNotAssigned(var, funcName):
+    str_var = var
+    r_var = str_var.rstrip(str_var[-1])
+    print('ValueError: "{}" was not assigned before use in "{}"'.format(r_var, funcName))
 

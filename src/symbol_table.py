@@ -73,6 +73,7 @@ def print_symbolTable(symbolTable):
 def get_function(functionDefNode, functionDefinition):
 
     undeclaredVars = list()
+    assignmentList = list()
 
     if functionDefNode == None:
         functionDefNode = dict()
@@ -82,7 +83,7 @@ def get_function(functionDefNode, functionDefinition):
     if functionDefinition['compoundStatement'] != None:
         compoundstatements = functionDefinition['compoundStatement']
         if 'localDeclarations' in compoundstatements and compoundstatements['localDeclarations'] != None:
-            functionDefNode, undeclaredVars = get_localDeclarations(functionDefNode, compoundstatements, undeclaredVars)
+            functionDefNode, undeclaredVars, assignmentList = get_localDeclarations(functionDefNode, compoundstatements, undeclaredVars, assignmentList)
 
 
         
@@ -91,7 +92,7 @@ def get_function(functionDefNode, functionDefinition):
 
 
 #parse through the local declarations to get local variables in function
-def get_localDeclarations(functionDefNode, compoundstatements, undeclaredVars):
+def get_localDeclarations(functionDefNode, compoundstatements, undeclaredVars, assignmentList):
     localDeclarations = compoundstatements['localDeclarations']
 
     if 'variableDeclaration' in localDeclarations:
@@ -100,34 +101,53 @@ def get_localDeclarations(functionDefNode, compoundstatements, undeclaredVars):
         functionDefNode[variableName] = get_variableType(variableDeclaration)
 
     if 'localDeclarations' in localDeclarations and localDeclarations['localDeclarations'] !=None:
-        functionDefNode, undeclaredVars = get_localDeclarations(functionDefNode, localDeclarations, undeclaredVars)
+        functionDefNode, undeclaredVars, assignmentList = get_localDeclarations(functionDefNode, localDeclarations, undeclaredVars, assignmentList)
 
     #check for variable declaration before use
     if 'compoundStatement' in compoundstatements and compoundstatements['compoundStatement'] != None:
-        undeclaredVars = check_expressions(functionDefNode, compoundstatements, undeclaredVars)
+        undeclaredVars, assignmentList = check_expressions(functionDefNode, compoundstatements, undeclaredVars, assignmentList)
         
-    return functionDefNode, undeclaredVars
+    return functionDefNode, undeclaredVars, assignmentList
 
 
 
-def check_expressions(functionDefNode, compoundstatements, undeclaredVars):
+def check_expressions(functionDefNode, compoundstatements, undeclaredVars, assignmentList):
 
         compoundStatement = compoundstatements['compoundStatement']
         primaryStatement = compoundStatement['primaryStatement']
         if 'assignmentExpression' in primaryStatement:
             assignmentExpression = primaryStatement['assignmentExpression']
             assignedVar = assignmentExpression['identifier']['contents']
-            undeclaredVars = check_VarDeclaration(functionDefNode, assignedVar, undeclaredVars)
+            undeclaredVars, varState  = check_VarDeclaration(functionDefNode, assignedVar, undeclaredVars)
+
+            if varState is True:
+                assignmentList.append(assignedVar)
+
 
             if 'expression' in assignmentExpression:
                 expression = assignmentExpression['expression']
-                undeclaredVars = check_rExpression(functionDefNode, expression, undeclaredVars)
+                undeclaredVars = check_rExpression(functionDefNode, expression, undeclaredVars, assignmentList)
+
+
+        if 'returnStatement' in primaryStatement:
+            returnStatement = primaryStatement['returnStatement']
+            returncontents = returnStatement['contents']
+            
+            if 'contents' in returncontents:
+                returnVar = returncontents['contents']['contents']
+                undeclaredVars, varState = check_VarDeclaration(functionDefNode, returnVar, undeclaredVars)
+
+                if varState is True:
+                    undeclaredVars = check_VarAssigned(assignmentList, returnVar, undeclaredVars)
+
+
+
 
         if 'compoundStatement' in compoundStatement and compoundStatement['compoundStatement'] != None:
-            undeclaredVars = check_expressions(functionDefNode, compoundStatement, undeclaredVars)
+            undeclaredVars, assignmentList = check_expressions(functionDefNode, compoundStatement, undeclaredVars, assignmentList)
 
 
-        return undeclaredVars
+        return undeclaredVars, assignmentList
 
 
 
@@ -145,14 +165,18 @@ def get_variableType(variableDeclaration):
 
 
 #check right hand expressions for varible being declared
-def check_rExpression(functionDefNode, expression, undeclaredVars):
+def check_rExpression(functionDefNode, expression, undeclaredVars, assignmentList):
     if 'expression' in expression:
         expr = expression['expression']
         exprVar = expr['contents']['contents']
-        undeclaredVars = check_VarDeclaration(functionDefNode, exprVar, undeclaredVars)
+        undeclaredVars, varState = check_VarDeclaration(functionDefNode, exprVar, undeclaredVars)
+
+        if varState is True:
+            undeclaredVars = check_VarAssigned(assignmentList, exprVar, undeclaredVars)
+
 
         if 'expression' in expr:
-            undeclaredVars = check_rExpression(functionDefNode, expr, undeclaredVars)
+            undeclaredVars, _  = check_rExpression(functionDefNode, expr, undeclaredVars)
 
     return undeclaredVars
 
@@ -161,13 +185,36 @@ def check_rExpression(functionDefNode, expression, undeclaredVars):
 
 #variable declaration checker
 def check_VarDeclaration(functionDefNode, assignedVar, undeclaredVars):
+    varState = True    # we assume all variables are dclared before being used
+
     if assignedVar != None:
         if assignedVar not in functionDefNode:
-            undeclaredVars.append(assignedVar)
 
-    return undeclaredVars
+            undeclaredVars.append(str(assignedVar))
+            varState = False
+
+
+    return undeclaredVars, varState
            
             
+
+
+
+#checks if variable on right side of expression is assigned before use
+def check_VarAssigned(assignmentList, exprVar, undeclaredVars):
+
+    if assignmentList:
+        count_exist = assignmentList.count(exprVar)
+
+        if count_exist == 0:
+            str_var = str(exprVar)
+            str_var = str_var + '+'
+            undeclaredVars.append(str_var)
+
+
+    return undeclaredVars
+
+
 
 #add global variables to symbol table
 def get_globalVariables(globalVariables):
