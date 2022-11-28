@@ -19,8 +19,8 @@ class astException(Exception):
     pass
 
 def print_ast(ast):
-    print("\nAbstract Syntax Tree:")
-    print(ast)
+    print("Abstract Syntax Tree:")
+    print(str(ast) + "\n")
 
 def add_funcDef(functionDefinition): # Begin descending down functionDefinition
     functionDefNode = {}

@@ -166,7 +166,6 @@ def parse_expression(tokens):
     expression = {'type': 'expression'}
     if tokens[localIndex + 1]['type'] == 'OP' and tokens[localIndex + 1]['contents'] != '=':
         expression['binaryExpression'] = parse_binaryExpression(tokens)
-        print("Binary Expression")
     elif tokens[localIndex]['contents'].isnumeric():
         expression['constant'] = parse_constant(tokens)
     else:
@@ -195,5 +194,5 @@ def parse_constant(tokens):
         raise parseException
 
 def print_parseTree(parseTree):
-    print("\nParse Tree:")
-    print(parseTree)
+    print("Parse Tree:")
+    print(str(parseTree) + "\n")
