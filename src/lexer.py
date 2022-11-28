@@ -67,6 +67,7 @@ def generate_token(match, type):
     return token
 
 def print_tokens(tokens):
-    print("\nTokens:")
+    print("Tokens:")
     for i in range(len(tokens)):
         print('[' + str(i) + '] ' + str(tokens[i]))
+    print()

@@ -34,9 +34,9 @@ def main():
     parseTree = parse(tokens)  # Parse tokens into a grammatical parse tree
     if args.parseTree:
         print_parseTree(parseTree)
-    #ast = astGen(parseTree)  # Transform parse tree into an abstract syntax tree
-    #if args.ast:
-     #   print_ast(ast)
+    ast = astGen(parseTree)  # Transform parse tree into an abstract syntax tree
+    if args.ast:
+       print_ast(ast)
     symbolTable = generate_symbolTable(parseTree)  # Traverse parse tree to build a symbol table
     if symbolTable:
         if args.symbolTable:

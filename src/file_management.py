@@ -18,7 +18,7 @@ def get_path(filename):
     currentDir = os.getcwd()
     parentDir = os.path.abspath(os.path.join(currentDir, os.pardir))
     filePath = parentDir + '\\test\\examples\\' + filename
-    print("Source Filepath: " + str(filePath))
+    print("\nSource Filepath: " + str(filePath) + "\n")
     return filePath
 
 
