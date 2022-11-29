@@ -4,7 +4,7 @@ ast.py
 @Author - Shanti Upadhyay - spu0004@auburn.edu
 @Author - Ethan Brown - ewb0020@auburn.edu
 
-@Version - 28 NOV 22
+@Version - 29 NOV 22
 
 Generates AST from Parse Tree
 '''
@@ -24,30 +24,23 @@ def print_ast(ast):
 
 def add_funcDef(functionDefinition): # Begin descending down functionDefinition
     functionDefNode = {}
-    localVariables = [] # Local symbol table just to get this working properly. This should be made to work with symboltable.py
     compoundStatement = functionDefinition['compoundStatement']
-    functionDefNode[functionDefinition['ID']['contents']] = add_compoundStatement(None, compoundStatement, localVariables)
+    functionDefNode[functionDefinition['ID']['contents']] = add_compoundStatement(compoundStatement)
     return functionDefNode
 
-def add_compoundStatement(compoundStatementNode, compoundStatement, localVariables):
-    if compoundStatementNode == None:
-        compoundStatementNode = {}
-    statementKeys = compoundStatement.keys()
-    if 'localDeclarations' in statementKeys and compoundStatement['localDeclarations'] != None:
-        localDeclarations = compoundStatement['localDeclarations']
-        compoundStatementNode, localVariables = add_localDeclarations(compoundStatementNode, localDeclarations, localVariables)
-    if 'primaryStatement' in statementKeys and compoundStatement['primaryStatement'] != None:
+def add_compoundStatement(compoundStatement):
+    compoundStatementNode = []
+    if 'localDeclarations' in compoundStatement and compoundStatement['localDeclarations'] != None:
+        pass
+    elif 'primaryStatement' in compoundStatement and compoundStatement['primaryStatement'] != None:
         primaryStatement = compoundStatement['primaryStatement']
-        if 'returnStatement' in primaryStatement.keys():
-            returnStatement = primaryStatement['returnStatement']
-            compoundStatementNode = add_returnStatement(compoundStatementNode, returnStatement, localVariables)
-        elif 'assignmentExpression' in primaryStatement.keys():
-            assignmentExpression = primaryStatement['assignmentExpression']
-            compoundStatementNode = add_assignmentExpression(compoundStatementNode, assignmentExpression, localVariables)
-        else:
-            raise astException 
+        compoundStatementNode.append(add_primaryStatement(primaryStatement))
+    else:
+        raise astException
+
     if compoundStatement['compoundStatement'] != None:
-        compoundStatementNode = add_compoundStatement(compoundStatementNode, compoundStatement['compoundStatement'], localVariables)
+        compoundStatementNode += add_compoundStatement(compoundStatement['compoundStatement'])
+
     return compoundStatementNode
 
 def add_localDeclarations(compoundStatementNode, localDeclarations, localVariables): # this is recursive
@@ -61,43 +54,50 @@ def add_localDeclarations(compoundStatementNode, localDeclarations, localVariabl
         compoundStatementNode, localVariables = add_localDeclarations(compoundStatementNode, nestedLocalDeclarations, localVariables)
     return compoundStatementNode, localVariables
 
-def add_assignmentExpression(compoundStatementNode, assignmentExpression, variables):
-    identifier = assignmentExpression['identifier']['contents']
-    if identifier in variables:
-        expression = assignmentExpression['expression']
-        compoundStatementNode[identifier] = add_expression(expression, compoundStatementNode, variables)
+def add_primaryStatement(primaryStatment):
+    if 'assignmentExpression' in primaryStatment:
+        assignmentExpression = primaryStatment['assignmentExpression']
+        primaryStatementNode = add_assignmentExpression(assignmentExpression)
+    elif 'returnStatement' in primaryStatment:
+        returnStatement = primaryStatment['returnStatement']
+        primaryStatementNode = add_returnStatement(returnStatement)
     else:
         raise astException
-    return compoundStatementNode
+    return primaryStatementNode
 
-def add_expression(expression, localNode, variables):
-    expressionNode = {}
-    if 'binaryExpression' in expression:
-        binaryExpression = expression['binaryExpression']
-        expressionNode = add_binaryExpression(binaryExpression, localNode, variables)
-    elif 'constant' in expression:
+def add_assignmentExpression(assignmentExpression):
+    identifier = assignmentExpression['identifier']['contents']
+    expression = add_expression(assignmentExpression['expression'])
+    assignmentExpressionNode = identifier + " = " + expression
+    return assignmentExpressionNode
+
+
+def add_expression(expression):
+    if 'constant' in expression:
         expressionNode = add_constant(expression['constant'])
     elif 'identifier' in expression:
-        identifier = expression['identifier']['contents']
-        if identifier in variables:
-            expressionNode = {identifier: localNode[identifier]}
-        else:
-            raise astException
+        expressionNode = add_identifier(expression['identifier'])
+    elif 'binaryExpression' in expression:
+        expressionNode = add_binaryExpression(expression['binaryExpression'])
+    else:
+        raise astException
     return expressionNode
 
-def add_binaryExpression(binaryExpression, localNode, variables):
-    binaryExpressionNode = {}
+def add_binaryExpression(binaryExpression):
     op = binaryExpression['op']['contents']
     expression1 = binaryExpression['expression1']
     expression2 = binaryExpression['expression2']
-    binaryExpressionNode[op] = [add_expression(expression1, localNode, variables), add_expression(expression2, localNode, variables)]
+    binaryExpressionNode = add_expression(expression1) + " " + op + " " + add_expression(expression2)
     return binaryExpressionNode
 
-def add_returnStatement(compoundStatementNode, returnStatement, localVariables):
-    expression = returnStatement['contents']
-    compoundStatementNode['return'] = add_expression(expression, compoundStatementNode, localVariables)
-    return compoundStatementNode   
+def add_returnStatement(returnStatement):
+    expression = add_expression(returnStatement['contents'])
+    returnStatementNode = "return " + expression
+    return returnStatementNode
 
 def add_constant(constant):
     return constant['contents']
+
+def add_identifier(identifier):
+    return identifier['contents']
     
