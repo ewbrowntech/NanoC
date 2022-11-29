@@ -24,7 +24,6 @@ def generate_symbolTable(parseTree):
     symbolTable, undeclaredList = get_declarationList(parseTree)
 
     emptyList = all(undeclared == [] for undeclared in list(undeclaredList.values()))
-    print(undeclaredList)
 
     if emptyList is True:
         return symbolTable
