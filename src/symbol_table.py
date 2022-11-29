@@ -42,9 +42,10 @@ def get_declarationList(parseTree):
         declarationListNode[globalVariables['ID']['contents']] = get_globalVariables(globalVariables)
 
     else:
-        print('\n')
+        pass
+        # print('\n')
         #print('\n----------------'\n)
-        print('No global variables declared: ')
+        # print('No global variables declared: ')
 
  
     for key in declarationList:

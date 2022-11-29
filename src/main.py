@@ -4,13 +4,14 @@ from lexer import lexer, print_tokens
 from parser import parse, print_parseTree
 from ast import astGen, print_ast
 from symbol_table import generate_symbolTable, print_symbolTable
+from ir import generate_ir, print_ir
 
 '''
 main.py
 
 @Author - Ethan Brown - ewb0020@auburn.edu
 
-@Version - 17 NOV 22
+@Version - 29 NOV 22
 
 Runs compiler
 '''
@@ -23,6 +24,7 @@ def main():
     argparser.add_argument('-p', '--parseTree', action='store_true')
     argparser.add_argument('-a', '--ast', action='store_true')
     argparser.add_argument('-s', '--symbolTable', action='store_true')
+    argparser.add_argument('-i', '--ir', action='store_true')
     argparser.add_argument('filename')
     args = argparser.parse_args()
     fileContents = load_file(args.filename)
@@ -40,6 +42,9 @@ def main():
     symbolTable = generate_symbolTable(parseTree)  # Traverse parse tree to build a symbol table
     if symbolTable and args.symbolTable:
         print_symbolTable(symbolTable)
+    ir = generate_ir(ast)
+    if args.ir:
+        print_ir(ir)
 
 
 if __name__ == '__main__':

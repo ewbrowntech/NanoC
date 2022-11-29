@@ -33,16 +33,16 @@ def unpack_variable(function, variable):
 
 def unpack_expression(variable, expression):
     global ir
-    print(variable)
-    print(expression)
+    # print(variable)
+    # print(expression)
     operator, operands = list(expression.keys())[0], list(expression.values())[0]
     operand1 = operands[0]
     operand2 = operands[1]
-    print(operator)
-    print(operands)
+    # print(operator)
+    # print(operands)
 
     maincode = variable + " = "
-    print(maincode)
+    # print(maincode)
 
     #operand1
     if type(operand1) == dict:
@@ -50,7 +50,7 @@ def unpack_expression(variable, expression):
         code = str(list(operand1.keys())[0]) + " = " + str(list(operand1.values())[0]) + "\n"
         if code not in ir:
             ir += code
-        print(code)
+        # print(code)
     else:
         maincode += operand1 + " "
 
@@ -62,15 +62,15 @@ def unpack_expression(variable, expression):
         code = str(list(operand2.keys())[0]) + " = " + str(list(operand2.values())[0]) + "\n"
         if code not in ir:
             ir += code
-        print(code)
+        # print(code)
     else:
         maincode += operand2 + "\n"
 
     maincode += "\n"
     if maincode not in ir:
         ir += maincode
-    print(maincode)
-    print()
+    # print(maincode)
+    # print()
 
 def add_assignmentCode(function, variable):
     global ir
