@@ -14,6 +14,7 @@
 # ERROR WHEN VARIABLE IS NOT DECLARED BEFORE USE
 def variableNotDeclared(listOfVariables):
     if listOfVariables:
+        print('Identified errors when building the symbol Table: \n')
         for funcName, varlist in listOfVariables.items():
             if varlist:
                 for var in varlist:

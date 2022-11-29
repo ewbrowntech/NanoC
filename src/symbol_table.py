@@ -18,14 +18,17 @@
 import errors
 
 
-def generate_symbolTable(psrseTree):
+def generate_symbolTable(parseTree):
     symbolTable = dict()
 
-    symbolTable, undeclaredList = get_declarationList(psrseTree)
+    symbolTable, undeclaredList = get_declarationList(parseTree)
 
-    if not undeclaredList:
+    emptyList = all(undeclared == [] for undeclared in list(undeclaredList.values()))
+    print(undeclaredList)
+
+    if emptyList is True:
         return symbolTable
-    else:
+    elif emptyList is False:
         errors.variableNotDeclared(undeclaredList)
 
 
@@ -133,8 +136,8 @@ def check_expressions(functionDefNode, compoundstatements, undeclaredVars, assig
             returnStatement = primaryStatement['returnStatement']
             returncontents = returnStatement['contents']
             
-            if 'contents' in returncontents:
-                returnVar = returncontents['contents']['contents']
+            if 'identifier' in returncontents:
+                returnVar = returncontents['identifier']['contents']
                 undeclaredVars, varState = check_VarDeclaration(functionDefNode, returnVar, undeclaredVars)
 
                 if varState is True:
@@ -166,17 +169,18 @@ def get_variableType(variableDeclaration):
 
 #check right hand expressions for varible being declared
 def check_rExpression(functionDefNode, expression, undeclaredVars, assignmentList):
-    if 'expression' in expression:
-        expr = expression['expression']
-        exprVar = expr['contents']['contents']
-        undeclaredVars, varState = check_VarDeclaration(functionDefNode, exprVar, undeclaredVars)
 
-        if varState is True:
-            undeclaredVars = check_VarAssigned(assignmentList, exprVar, undeclaredVars)
+    if 'bibaryExpression' in expression:
+        binaryExpression = expression['binaryExpression']
 
+        for expr in binaryExpression:
+            if 'identifier' in expr:
+                exprVar = expr['identifier']['contents']
+                undeclaredVars, varState = check_VarDeclaration(functionDefNode, exprVar, undeclaredVars)
 
-        if 'expression' in expr:
-            undeclaredVars, _  = check_rExpression(functionDefNode, expr, undeclaredVars)
+                if varState is True:
+                    undeclaredVars = check_VarAssigned(assignmentList, exprVar, undeclaredVars)
+
 
     return undeclaredVars
 
