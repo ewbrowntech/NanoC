@@ -32,5 +32,5 @@ def variableNotDeclared(listOfVariables):
 def variableNotAssigned(var, funcName):
     str_var = var
     r_var = str_var.rstrip(str_var[-1])
-    print('ValueError: "{}" was not assigned before use in "{}"'.format(r_var, funcName))
+    print('ValueWarning: "{}" was not assigned before use in "{}"'.format(r_var, funcName))
 

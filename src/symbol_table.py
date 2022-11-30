@@ -23,11 +23,11 @@ def generate_symbolTable(parseTree):
 
     symbolTable, undeclaredList = get_declarationList(parseTree)
 
-    emptyList = all(undeclared == [] for undeclared in list(undeclaredList.values()))
+    emptyList = all(undeclared == [] for undeclared in list(undeclaredList.values())[0])
 
     if emptyList is True:
         return symbolTable
-    elif emptyList is False:
+    else:
         errors.variableNotDeclared(undeclaredList)
 
 
@@ -169,16 +169,18 @@ def get_variableType(variableDeclaration):
 #check right hand expressions for varible being declared
 def check_rExpression(functionDefNode, expression, undeclaredVars, assignmentList):
 
-    if 'bibaryExpression' in expression:
+    if 'binaryExpression' in expression:
         binaryExpression = expression['binaryExpression']
 
         for expr in binaryExpression:
-            if 'identifier' in expr:
-                exprVar = expr['identifier']['contents']
-                undeclaredVars, varState = check_VarDeclaration(functionDefNode, exprVar, undeclaredVars)
+            if type(binaryExpression[expr]) == dict:
+                rExpr = binaryExpression[expr]
+                if 'identifier' in rExpr:
+                    exprVar = rExpr['identifier']['contents']
+                    undeclaredVars, varState = check_VarDeclaration(functionDefNode, exprVar, undeclaredVars)
 
-                if varState is True:
-                    undeclaredVars = check_VarAssigned(assignmentList, exprVar, undeclaredVars)
+                    if varState is True:
+                        undeclaredVars = check_VarAssigned(assignmentList, exprVar, undeclaredVars)
 
 
     return undeclaredVars
