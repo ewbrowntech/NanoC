@@ -3,7 +3,7 @@ parser.py
 
 @Author - Ethan Brown - ewb0020@auburn.edu
 
-@Version - 27 NOV 22
+@Version - 30 NOV 22
 
 Parses tokens
 """
@@ -123,14 +123,12 @@ def parse_variableDeclaration(tokens):
 def parse_primaryStatement(tokens):
     global localIndex
     primaryStatement = {'type': 'primaryStatement'}
-
     if tokens[localIndex]['type'] == 'ID':
         primaryStatement['assignmentExpression'] = parse_assignmentExpression(tokens)
     elif tokens[localIndex]['contents'] == 'return':
         primaryStatement['returnStatement'] = parse_returnStatement(tokens)
     else:
         primaryStatement['expression'] = parse_expression(tokens)
-
     if tokens[localIndex]['type'] == 'SYMBOL' and tokens[localIndex]['contents'] == ';':
         localIndex += 1
         return primaryStatement
@@ -160,12 +158,19 @@ def parse_returnStatement(tokens):
     else:
         raise parseException
 
-# <expression> := <constant> | <identifier> | <expression> <op> <expression>
+# <expression> := <constant> | <identifier> | <binaryExpression> | <containedExpression>
 def parse_expression(tokens):
     global localIndex
     expression = {'type': 'expression'}
     if tokens[localIndex + 1]['type'] == 'OP' and tokens[localIndex + 1]['contents'] != '=':
         expression['binaryExpression'] = parse_binaryExpression(tokens)
+    elif tokens[localIndex]['type'] == 'LPAR' and tokens[localIndex]['contents'] == '(':
+        expressionNode = parse_containedExpression(tokens)
+        if expressionNode['type'] == 'containedExpression':
+            expression['containedExpression'] = expressionNode
+        else:
+            expression['binaryExpression'] = expressionNode
+
     elif tokens[localIndex]['contents'].isnumeric():
         expression['constant'] = parse_constant(tokens)
     else:
@@ -182,6 +187,26 @@ def parse_binaryExpression(tokens):
     binaryExpression['expression2'] = parse_expression(tokens)
 
     return binaryExpression
+
+# <containedExpression> := ( <expression> )
+def parse_containedExpression(tokens):
+    global localIndex
+    containedExpression = {'type': 'containedExpression'}
+    localIndex += 1
+    containedExpression['expression'] = parse_expression(tokens)
+    if tokens[localIndex]['type'] != 'RPAR':
+        raise parseException
+    localIndex += 1
+
+    if tokens[localIndex]['type'] == 'OP':
+        binaryExpression = {'type': 'binaryExpression', 'op': tokens[localIndex]}
+        localIndex += 1
+        binaryExpression['expression1'] = containedExpression
+        binaryExpression['expression2'] = parse_expression(tokens)
+        return binaryExpression
+    else:
+        return containedExpression
+
 # <constant> := num
 def parse_constant(tokens):
     global localIndex

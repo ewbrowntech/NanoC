@@ -79,6 +79,10 @@ def add_expression(expression):
         expressionNode = add_identifier(expression['identifier'])
     elif 'binaryExpression' in expression:
         expressionNode = add_binaryExpression(expression['binaryExpression'])
+    elif 'containedExpression' in expression:
+        expressionNode = add_containedExpression(expression['containedExpression'])
+    elif expression['type'] == 'containedExpression':
+        expressionNode = add_containedExpression(expression)
     else:
         raise astException
     return expressionNode
@@ -89,6 +93,11 @@ def add_binaryExpression(binaryExpression):
     expression2 = binaryExpression['expression2']
     binaryExpressionNode = add_expression(expression1) + " " + op + " " + add_expression(expression2)
     return binaryExpressionNode
+
+def add_containedExpression(containedExpression):
+    expression = containedExpression['expression']
+    containedExpressionNode = "(" + add_expression(expression) + ")"
+    return containedExpressionNode
 
 def add_returnStatement(returnStatement):
     expression = add_expression(returnStatement['contents'])
