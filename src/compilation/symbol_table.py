@@ -15,7 +15,7 @@
     parameters (function), and variables properties under each function
 '''
 
-import errors
+import compilation.errors as errors
 
 
 def generate_symbolTable(parseTree):

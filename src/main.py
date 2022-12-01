@@ -1,10 +1,10 @@
 import argparse
 from file_management import load_file
-from lexer import lexer, print_tokens
-from parser import parse, print_parseTree
-from ast import astGen, print_ast
-from symbol_table import generate_symbolTable, print_symbolTable, query_symbolTable
-from ir import generate_ir, print_ir
+from compilation.lexer import lexer, print_tokens
+from compilation.parser import parse, print_parseTree
+from compilation.ast import astGen, print_ast
+from compilation.symbol_table import generate_symbolTable, print_symbolTable
+from compilation.ir import generate_ir, print_ir
 
 
 '''
