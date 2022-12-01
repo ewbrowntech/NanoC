@@ -50,7 +50,7 @@ def main():
     if args.ir:
        print_ir(ir)
     if args.optimize:
-        ir = optimize(ir)
+        ir = optimize(ir, symbolTable)
         print_optimizedIR(ir)
     # query_symbolTable('val2', symbolTable)
 

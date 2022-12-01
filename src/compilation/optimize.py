@@ -10,10 +10,11 @@ optimize.py
 Perform optimization passes upon the IR
 '''
 
-def optimize(ir):
-    ir = perform_dead_code_removal(ir)
+def optimize(ir, symbolTable):
+    ir = perform_dead_code_removal(ir, symbolTable)
     return ir
 
 def print_optimizedIR(ir):
     print("Optimized IR:")
-    print(str(ir))
+    for code in ir:
+        print(code)
