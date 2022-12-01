@@ -32,7 +32,7 @@ def unpack_function(ast, function):
         else:
             ir += instruction + "\n"
 
-def split_instruction(instruction):
+def split_instruction(instruction): # No proper order of operations for now
     primaryOps = ['*']
     secondaryOps = ['+', '-']
     identifier = instruction.split("=")[0].strip()      # Keep the identifier for use in any added lines
@@ -41,9 +41,11 @@ def split_instruction(instruction):
         if character in primaryOps or character in secondaryOps:
             instructionOps.append(character)            # Get every op in the instruction
     expression = instruction.split("=")[1].strip()      # Get the expression being split
-    instructionH1 = identifier + " = " + expression.split(instructionOps[1])[0].strip()
+    expressionH1 = expression.rsplit(instructionOps[1], 1)[0].strip()
+    expressionH2 = expression.rsplit(instructionOps[1], 1)[1].strip()
+    instructionH1 = identifier + " = " + expressionH1
     instructionH2 = identifier + " = " + identifier + " " + instructionOps[1] + " " + \
-                    expression.split(instructionOps[1])[1].strip()
+                    expressionH2
     modifiedInstruction = instructionH1 + "\n" + instructionH2 + "\n"
     return modifiedInstruction
 
