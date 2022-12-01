@@ -4,10 +4,7 @@ from lexer import lexer, print_tokens
 from parser import parse, print_parseTree
 from ast import astGen, print_ast
 from symbol_table import generate_symbolTable, print_symbolTable, query_symbolTable
-
 from ir import generate_ir, print_ir
-
-from threeAddressCode import generate_3AC, print_addressCodes
 
 
 '''
@@ -15,7 +12,7 @@ main.py
 
 @Author - Ethan Brown - ewb0020@auburn.edu
 
-@Version - 29 NOV 22
+@Version - 01 DEC 22
 
 Runs compiler
 '''
@@ -28,10 +25,7 @@ def main():
     argparser.add_argument('-p', '--parseTree', action='store_true')
     argparser.add_argument('-a', '--ast', action='store_true')
     argparser.add_argument('-s', '--symbolTable', action='store_true')
-
     argparser.add_argument('-i', '--ir', action='store_true')
-
-    argparser.add_argument('-3ac', '--addressCode', action='store_true')
 
     argparser.add_argument('filename')
     args = argparser.parse_args()
@@ -50,20 +44,10 @@ def main():
     symbolTable = generate_symbolTable(parseTree)  # Traverse parse tree to build a symbol table
     if symbolTable and args.symbolTable:
         print_symbolTable(symbolTable)
-
-    #ir = generate_ir(ast)
-    #if args.ir:
-     #   print_ir(ir)
-
-    #threeAddressCodes = generate_3AC(ast)
-    #if args.addressCode:
-     #   print_addressCodes(threeAddressCodes)i
-
-    query_symbolTable('val2', symbolTable)
-
-
-
-
+    ir = generate_ir(ast)
+    if args.ir:
+       print_ir(ir)
+    # query_symbolTable('val2', symbolTable)
 
 
 if __name__ == '__main__':
