@@ -3,8 +3,7 @@ import os
 file_management.py
 
 @Author - Ethan Brown - ewb0020@auburn.edu
-
-@Version - 29 AUG 22
+@Version - 17 NOV 22
 
 Manages the input and output of files
 '''
@@ -18,9 +17,10 @@ Manages the input and output of files
 def get_path(filename):
     currentDir = os.getcwd()
     parentDir = os.path.abspath(os.path.join(currentDir, os.pardir))
-    filePath = parentDir + '\\test\examples\\' + filename
-    print(filePath)
+    filePath = parentDir + '/test/examples/' + filename
+    print("\nSource Filepath: " + str(filePath) + "\n")
     return filePath
+
 
 # Loads specified file from examples folder and creates a string with its contents
 # Arguments:
@@ -33,6 +33,6 @@ def load_file(filename):
         file = open(filePath, "r")
         fileContents = file.read()
         file.close()
-    except:
+    except OSError:
         return "Error: File not found"
     return fileContents
