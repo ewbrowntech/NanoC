@@ -232,6 +232,49 @@ def get_globalVariables(globalVariables):
 
 
 
+# function to query the symbol table for funcction and variable
+def query_symbolTable(variable, symbolTable):
+
+    checker = 0
+
+    for global_params in symbolTable:
+        if variable == global_params:
+            if type(symbolTable[global_params]) == dict:
+                func_params = symbolTable[global_params]
+                for params in func_params:
+                    if params == 'returnType':
+                        returnType = func_params[params]
+                        checker = 1
+                        print("function '{}' is of type '{}' \n".format(variable, returnType))
+
+            else:
+                checker = 1
+                print("variable '{}' is in global scope \n".format(variable))
+
+        else:
+            func_params = symbolTable[global_params]
+            for params in func_params:
+                if variable == params:
+                    varTypeInfo = func_params[params]
+                    if type(varTypeInfo) == dict:
+                        varType = list(varTypeInfo.values())[0]
+                        checker = 1
+                        print("variable '{}' in function '{}' is of type '{}' \n".format(variable, global_params, varType))
+
+    if checker == 0:
+        print("Error: Cannot find '{}'in the symbolTable \n ".format(variable))
+
+
+
+
+
+
+
+
+
+
+
+
 
     
 
