@@ -1,0 +1,19 @@
+from .optimizations.dead_code_removal import perform_dead_code_removal
+
+'''
+optimize.py
+
+@Author - Ethan Brown - ewb0020@auburn.edu
+
+@Version - 01 DEC 22
+
+Perform optimization passes upon the IR
+'''
+
+def optimize(ir):
+    ir = perform_dead_code_removal(ir)
+    return ir
+
+def print_optimizedIR(ir):
+    print("Optimized IR:")
+    print(str(ir))

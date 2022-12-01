@@ -5,6 +5,7 @@ from compilation.parser import parse, print_parseTree
 from compilation.ast import astGen, print_ast
 from compilation.symbol_table import generate_symbolTable, print_symbolTable
 from compilation.ir import generate_ir, print_ir
+from compilation.optimize import optimize, print_optimizedIR
 
 
 '''
@@ -26,6 +27,7 @@ def main():
     argparser.add_argument('-a', '--ast', action='store_true')
     argparser.add_argument('-s', '--symbolTable', action='store_true')
     argparser.add_argument('-i', '--ir', action='store_true')
+    argparser.add_argument('-o', '--optimize', action='store_true')
 
     argparser.add_argument('filename')
     args = argparser.parse_args()
@@ -47,6 +49,9 @@ def main():
     ir = generate_ir(ast)
     if args.ir:
        print_ir(ir)
+    if args.optimize:
+        ir = optimize(ir)
+        print_optimizedIR(ir)
     # query_symbolTable('val2', symbolTable)
 
 
