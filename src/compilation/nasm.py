@@ -34,19 +34,20 @@ def build_asm(ir):
 
     for code in ir:
         code_elements = list(code.split())
-        assignedVar = code_elements[0]
-        if assignedVar not in assigned_vars and assignedVar != 'return':
-            assigned_vars.append(assignedVar)
-            if len(code_elements) > 3:
-                asm_code = build_asm_expression(code_elements, assigned_vars)
-                assembly_code.append(asm_code)
-            else:
-                asm_code = build_asm_assignment(code_elements, assigned_vars)
-                assembly_code.append(asm_code)
+        if code_elements:
+            assignedVar = code_elements[0]
+            if assignedVar not in assigned_vars and assignedVar != 'return':
+                assigned_vars.append(assignedVar)
+                if len(code_elements) > 3:
+                    asm_code = build_asm_expression(code_elements, assigned_vars)
+                    assembly_code.append(asm_code)
+                else:
+                    asm_code = build_asm_assignment(code_elements, assigned_vars)
+                    assembly_code.append(asm_code)
 
-        elif assignedVar == 'return':
-            asm_code = build_asm_return(code_elements, assigned_vars)
-            assembly_code.append(asm_code)
+            elif assignedVar == 'return':
+                asm_code = build_asm_return(code_elements, assigned_vars)
+                assembly_code.append(asm_code)
 
     return assembly_code
 
