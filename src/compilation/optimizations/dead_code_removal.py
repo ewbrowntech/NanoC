@@ -3,7 +3,7 @@ dead_code_removal.py
 
 @Author - Shanti Upadhyay - spu0004@auburn.edu
 
-@Version - 01 DEC 22
+@Version - 08 DEC 22
 
 Remove unused code within function from IR
 '''
@@ -15,7 +15,6 @@ def perform_dead_code_removal(ir, symbolTable):
     global programVariables
     global utilizedVariables
     global dependencies
-    ir = ir.splitlines()
     programVariables = get_program_variables(symbolTable, programVariables)
     utilizedVariables, dependencies = get_utilized_variables(ir, programVariables, utilizedVariables, dependencies)
     ir = remove_lines(ir, utilizedVariables, dependencies)

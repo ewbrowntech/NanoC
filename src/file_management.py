@@ -3,7 +3,7 @@ import os
 file_management.py
 
 @Author - Ethan Brown - ewb0020@auburn.edu
-@Version - 17 NOV 22
+@Version - 08 DEC 22
 
 Manages the input and output of files
 '''
@@ -17,7 +17,7 @@ Manages the input and output of files
 def get_path(filename):
     currentDir = os.getcwd()
     parentDir = os.path.abspath(os.path.join(currentDir, os.pardir))
-    filePath = parentDir + '/test/examples/' + filename
+    filePath = parentDir + '\\test\\' + filename
     print("\nSource Filepath: " + str(filePath) + "\n")
     return filePath
 

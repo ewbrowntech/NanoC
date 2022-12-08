@@ -5,7 +5,7 @@ optimize.py
 
 @Author - Ethan Brown - ewb0020@auburn.edu
 
-@Version - 01 DEC 22
+@Version - 08 DEC 22
 
 Perform optimization passes upon the IR
 '''
@@ -18,3 +18,4 @@ def print_optimizedIR(ir):
     print("Optimized IR:")
     for code in ir:
         print(code)
+    print()

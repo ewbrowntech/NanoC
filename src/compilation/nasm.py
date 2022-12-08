@@ -17,13 +17,14 @@ def generate_asm(ir):
 
 #print assembly code
 def print_asm(assembly_code):
-    print('\n x86 Assembly Code:')
+    print('x86 Assembly Code:')
     for asm_code in assembly_code:
         if type(asm_code) == list:
             for sub_asm in asm_code:
                 print(sub_asm)
         else:
             print(asm_code)
+    print()
 
 
 
