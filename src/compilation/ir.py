@@ -4,12 +4,12 @@ ir.py
 
 @Author - Ethan Brown - ewb0020@auburn.edu
 
-@Version - 30 NOV 22
+@Version - 08 DEC 22
 
 Generates 3-Address Code Intermediate Representation (IR) from AST
 '''
 
-ir = ""
+ir = []
 
 def generate_ir(ast):
     for function in ast:
@@ -30,7 +30,7 @@ def unpack_function(ast, function):
         elif len(instructionOps) > 1: # IR is 3-address, so instructions with more than one op must be split
             ir += split_instruction(instruction)
         else:
-            ir += instruction + "\n"
+            ir += [instruction]
 
 def split_instruction(instruction): # No proper order of operations for now
     primaryOps = ['*']
@@ -46,7 +46,7 @@ def split_instruction(instruction): # No proper order of operations for now
     instructionH1 = identifier + " = " + expressionH1
     instructionH2 = identifier + " = " + identifier + " " + instructionOps[1] + " " + \
                     expressionH2
-    modifiedInstruction = instructionH1 + "\n" + instructionH2 + "\n"
+    modifiedInstruction = [instructionH1, instructionH2]
     return modifiedInstruction
 
 def acknowledge_parentheses(instruction):
@@ -57,7 +57,7 @@ def acknowledge_parentheses(instruction):
     # For situations like val = (1 + 1)
     if expression[0] == "(" and expression[-1] == ")" and \
             not any(character in ["(", ")"] for character in containedExpression): # For (1 + 1) but not (1) + (1)
-        return identifier + " = " + containedExpression + "\n"      # val = (1 + 1) becomes val = 1 + 1
+        return [identifier + " = " + containedExpression]      # val = (1 + 1) becomes val = 1 + 1
 
     ops = ['*', '+', '-']
     instructionOps = []
@@ -73,11 +73,13 @@ def acknowledge_parentheses(instruction):
         instructionH1 = identifier + " = " + containedExpression
         instructionH2 = identifier + " = " + identifier + " " + instructionOps[-1] + " " \
                         + instruction.split(")")[1].split(instructionOps[-1])[1].strip()
-    return instructionH1 + "\n" + instructionH2 + "\n"
+    return [instructionH1, instructionH2]
 
 class irException(Exception):
     pass
 
 def print_ir(ir):
     print("Intermediate Representation:")
-    print(str(ir))
+    for code in ir:
+        print(code)
+    print()
